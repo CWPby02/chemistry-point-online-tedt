@@ -1,0 +1,321 @@
+<!-- ==========================================================
+index.html — CPES Student Home
+Displays quizzes, notices, and links to payment.
+========================================================== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CPES — Chemistry Point Examination System</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/layout.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+
+  <!-- Firebase SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    /* small extra for notice cards */
+    .notice-card__tag {
+      background: rgba(108, 99, 255, 0.12);
+      color: var(--color-primary);
+      padding: 0 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.7rem;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .quiz-card .btn--block {
+      margin-top: auto;
+    }
+    .hero__wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 100'%3E%3Cpath fill='%23f8f9fe' d='M0,50 C300,100 600,0 1200,50 L1200,100 L0,100 Z'/%3E%3C/svg%3E") no-repeat bottom;
+      background-size: cover;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== HEADER / NAVBAR ==================== -->
+  <header class="navbar" role="banner">
+    <div class="navbar__container container">
+      <a href="index.html" class="navbar__brand">
+        <span class="navbar__logo-icon material-symbols-rounded">science</span>
+        <span class="navbar__brand-text">CPES</span>
+        <span class="navbar__brand-sub">Chemistry Point</span>
+      </a>
+      <button class="navbar__toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span class="material-symbols-rounded">menu</span>
+      </button>
+      <nav class="navbar__nav" aria-label="Primary navigation">
+        <ul class="navbar__menu">
+          <li><a href="index.html" class="navbar__link active">Home</a></li>
+          <li><a href="#quizzes" class="navbar__link">Exams</a></li>
+          <li><a href="#notices" class="navbar__link">Notices</a></li>
+        </ul>
+        <div class="navbar__actions">
+          <a href="admin/login.html" class="btn btn--outline btn--sm">
+            <span class="material-symbols-rounded">admin_panel_settings</span> Admin
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==================== HERO SECTION ==================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__container container">
+      <div class="hero__content">
+        <span class="hero__badge">⚡ Online Examination</span>
+        <h1 id="hero-title" class="hero__title">
+          Test Your <span class="hero__highlight">Chemistry</span> Knowledge
+        </h1>
+        <p class="hero__description">
+          Welcome to Chemistry Point Examination System. Purchase quizzes, verify payment, enter password, attempt exams, and earn certificates.
+        </p>
+        <div class="hero__actions">
+          <a href="#quizzes" class="btn btn--primary btn--lg">
+            <span class="material-symbols-rounded">play_arrow</span> Start Exam
+          </a>
+        </div>
+        <div class="hero__stats" id="heroStats">
+          <!-- stats will be loaded dynamically -->
+        </div>
+      </div>
+      <div class="hero__visual">
+        <div class="hero__card-glass">
+          <span class="material-symbols-rounded hero__visual-icon">experiment</span>
+          <h3>Chemistry Point</h3>
+          <p>Examination System</p>
+          <div class="hero__visual-badge">v3.0</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero__wave" aria-hidden="true"></div>
+  </section>
+
+  <!-- ==================== QUIZZES SECTION ==================== -->
+  <section id="quizzes" class="features" aria-labelledby="quizzes-title">
+    <div class="features__container container">
+      <div class="section-header">
+        <span class="section-header__subtitle">Our Exams</span>
+        <h2 id="quizzes-title" class="section-header__title">Available <span>Quizzes</span></h2>
+        <p class="section-header__desc">Choose a quiz, complete payment, and start learning instantly.</p>
+      </div>
+      <div class="features__grid" id="quizzesContainer">
+        <!-- Dynamic cards will be injected here -->
+        <div style="grid-column:1/-1; text-align:center; color:var(--color-text-light); padding:40px 0;">Loading quizzes...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== NOTICES SECTION ==================== -->
+  <section id="notices" class="notices" aria-labelledby="notices-title">
+    <div class="notices__container container">
+      <div class="section-header">
+        <span class="section-header__subtitle">Announcements</span>
+        <h2 id="notices-title" class="section-header__title">Latest <span>Notices</span></h2>
+        <p class="section-header__desc">Stay updated with important announcements.</p>
+      </div>
+      <div class="notices__grid" id="noticesContainer">
+        <!-- Dynamic notices will be injected -->
+        <div style="grid-column:1/-1; text-align:center; color:var(--color-text-light); padding:20px 0;">Loading notices...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer__container container">
+      <div class="footer__brand">
+        <a href="index.html" class="footer__logo">
+          <span class="material-symbols-rounded">science</span> <span>CPES</span>
+        </a>
+        <p class="footer__tagline">Chemistry Point Examination System — Learn, Test, Succeed.</p>
+        <div class="footer__social">
+          <a href="#" aria-label="Instagram"><span class="material-symbols-rounded">instagram</span></a>
+          <a href="#" aria-label="YouTube"><span class="material-symbols-rounded">smart_display</span></a>
+        </div>
+      </div>
+      <nav class="footer__nav" aria-label="Footer navigation">
+        <div class="footer__nav-col">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="#quizzes">Exams</a></li>
+            <li><a href="#notices">Notices</a></li>
+          </ul>
+        </div>
+        <div class="footer__nav-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div class="footer__nav-col">
+          <h4>Admin</h4>
+          <ul>
+            <li><a href="admin/login.html">Admin Login</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+    <div class="footer__bottom">
+      <div class="footer__bottom-container container">
+        <p>&copy; 2026 Chemistry Point Examination System. Built with ❤️ by Code With Piyush.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================== -->
+  <!-- SCRIPTS -->
+  <!-- ========================================================== -->
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJxrqXisH2oBk8naB7TJMnGsoO2RIm6Tg",
+      authDomain: "cpes-a88a2.firebaseapp.com",
+      databaseURL: "https://cpes-a88a2-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "cpes-a88a2",
+      storageBucket: "cpes-a88a2.firebasestorage.app",
+      messagingSenderId: "350376945623",
+      appId: "1:350376945623:web:eb884eb5cdac3f05aa0d92"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ==========================================================
+    // LOAD QUIZZES
+    // ==========================================================
+    async function loadQuizzes() {
+      const container = document.getElementById('quizzesContainer');
+      try {
+        const snap = await db.collection('quizzes').orderBy('createdAt', 'desc').get();
+        if (snap.empty) {
+          container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--color-text-light); padding:20px 0;">No quizzes available yet.</div>';
+          return;
+        }
+        let html = '';
+        snap.forEach(doc => {
+          const q = doc.data();
+          const featured = q.featured ? 'quiz-card--featured' : '';
+          const badge = q.featured ? `<div class="quiz-card__badge">Popular</div>` : '';
+          html += `
+            <article class="quiz-card ${featured}">
+              ${badge}
+              <div class="quiz-card__icon">
+                <span class="material-symbols-rounded">${q.icon || 'science'}</span>
+              </div>
+              <h3 class="quiz-card__title">${q.title || 'Untitled'}</h3>
+              <p class="quiz-card__desc">${q.description || ''}</p>
+              <div class="quiz-card__meta">
+                <span><span class="material-symbols-rounded">schedule</span> ${q.duration || 30} min</span>
+                <span><span class="material-symbols-rounded">quiz</span> ${q.questionsCount || 0} Qs</span>
+              </div>
+              <div class="quiz-card__price">₹${q.price || 0}</div>
+              <a href="student/payment.html?quiz=${doc.id}" class="btn btn--primary btn--block">
+                <span class="material-symbols-rounded">shopping_cart</span> Purchase
+              </a>
+            </article>
+          `;
+        });
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--color-danger); padding:20px 0;">Error loading quizzes: ${err.message}</div>`;
+      }
+    }
+
+    // ==========================================================
+    // LOAD NOTICES
+    // ==========================================================
+    async function loadNotices() {
+      const container = document.getElementById('noticesContainer');
+      try {
+        const snap = await db.collection('notices').orderBy('createdAt', 'desc').limit(3).get();
+        if (snap.empty) {
+          container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--color-text-light); padding:20px 0;">No notices at the moment.</div>';
+          return;
+        }
+        let html = '';
+        snap.forEach(doc => {
+          const n = doc.data();
+          html += `
+            <article class="notice-card">
+              <div class="notice-card__icon">
+                <span class="material-symbols-rounded">${n.icon || 'campaign'}</span>
+              </div>
+              <div class="notice-card__body">
+                <span class="notice-card__tag">${n.tag || 'Update'}</span>
+                <h3 class="notice-card__title">${n.title || 'Notice'}</h3>
+                <p class="notice-card__desc">${n.description || ''}</p>
+                <time class="notice-card__date" datetime="${n.createdAt || ''}">
+                  <span class="material-symbols-rounded">calendar_today</span> ${n.date || ''}
+                </time>
+              </div>
+            </article>
+          `;
+        });
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--color-danger); padding:20px 0;">Error loading notices: ${err.message}</div>`;
+      }
+    }
+
+    // ==========================================================
+    // LOAD STATS (for hero)
+    // ==========================================================
+    async function loadStats() {
+      try {
+        const [qSnap, pSnap] = await Promise.all([
+          db.collection('quizzes').get(),
+          db.collection('payment').get()
+        ]);
+        const statsHtml = `
+          <div class="hero__stat">
+            <span class="hero__stat-number">${qSnap.size}</span>
+            <span class="hero__stat-label">Quizzes</span>
+          </div>
+          <div class="hero__stat">
+            <span class="hero__stat-number">${pSnap.size}</span>
+            <span class="hero__stat-label">Payments</span>
+          </div>
+          <div class="hero__stat">
+            <span class="hero__stat-number">98%</span>
+            <span class="hero__stat-label">Satisfaction</span>
+          </div>
+        `;
+        document.getElementById('heroStats').innerHTML = statsHtml;
+      } catch (err) {
+        console.error('Stats error:', err);
+      }
+    }
+
+    // ==========================================================
+    // NAVBAR TOGGLE
+    // ==========================================================
+    document.querySelector('.navbar__toggle').addEventListener('click', function() {
+      const nav = document.querySelector('.navbar__nav');
+      nav.classList.toggle('open');
+      this.setAttribute('aria-expanded', nav.classList.contains('open'));
+    });
+
+    // ==========================================================
+    // INIT
+    // ==========================================================
+    loadQuizzes();
+    loadNotices();
+    loadStats();
+  </script>
+
+</body>
+</html>

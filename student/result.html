@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Result — CPES</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/layout.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <style>
+    .result-score { font-size:4rem; font-weight:var(--font-weight-bold); color:var(--color-primary); }
+    .result-grade { font-size:2.5rem; font-weight:var(--font-weight-bold); color:var(--color-primary); margin-top:4px; }
+    .result-details { display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin:16px 0; }
+    .result-details strong { display:block; font-size:1.6rem; }
+    .result-details .correct strong { color:var(--color-success); }
+    .result-details .wrong strong { color:var(--color-danger); }
+    .question-review { margin:16px 0; text-align:left; background:var(--color-bg); border-radius:var(--radius-md); padding:12px 16px; max-height:300px; overflow-y:auto; }
+    .question-review .q-item { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--color-border); }
+    .question-review .q-item:last-child { border-bottom:none; }
+    .q-item .status { font-weight:var(--font-weight-bold); }
+    .q-item .status.correct { color:var(--color-success); }
+    .q-item .status.wrong { color:var(--color-danger); }
+    .certificate-wrapper { margin-top:24px; padding:20px; background:#fff; border-radius:var(--radius-md); box-shadow:var(--shadow-md); border:2px solid var(--color-primary); }
+    .certificate-box { padding:24px 20px; text-align:center; background:linear-gradient(135deg,#f8f9fe,#e8ecff); border-radius:var(--radius-sm); }
+    .certificate-box h2 { font-size:1.6rem; color:var(--color-primary); margin-bottom:4px; }
+    .certificate-box .cert-title { font-size:1.2rem; font-weight:var(--font-weight-bold); letter-spacing:2px; border-bottom:2px solid var(--color-primary); display:inline-block; padding-bottom:4px; margin-bottom:12px; }
+    .cert-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+    .no-result { text-align:center; padding:40px 20px; }
+    .no-result .material-symbols-rounded { font-size:4rem; color:var(--color-warning); }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar__container container">
+      <a href="../index.html" class="navbar__brand">
+        <span class="navbar__logo-icon material-symbols-rounded">science</span>
+        <span class="navbar__brand-text">CPES</span>
+      </a>
+      <a href="../index.html" class="btn btn--outline btn--sm">Home</a>
+    </div>
+  </header>
+
+  <main style="padding:30px 0;">
+    <div class="container" style="max-width:800px;">
+      <div class="glass-card" id="resultContainer">
+        <div id="resultContent">
+          <div class="no-result">
+            <span class="material-symbols-rounded">hourglass_empty</span>
+            <h3>No result found</h3>
+            <p class="text-muted">Please complete a quiz first.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJxrqXisH2oBk8naB7TJMnGsoO2RIm6Tg",
+      authDomain: "cpes-a88a2.firebaseapp.com",
+      databaseURL: "https://cpes-a88a2-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "cpes-a88a2",
+      storageBucket: "cpes-a88a2.firebasestorage.app",
+      messagingSenderId: "350376945623",
+      appId: "1:350376945623:web:eb884eb5cdac3f05aa0d92"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ==========================================================
+    // LOAD RESULT FROM LOCALSTORAGE
+    // ==========================================================
+    function loadResult() {
+      const container = document.getElementById('resultContent');
+      const resultJSON = localStorage.getItem('cpes_result');
+      if (!resultJSON) {
+        container.innerHTML = `
+          <div class="no-result">
+            <span class="material-symbols-rounded">hourglass_empty</span>
+            <h3>No result found</h3>
+            <p class="text-muted">Please complete a quiz first.</p>
+          </div>
+        `;
+        return;
+      }
+
+      try {
+        const result = JSON.parse(resultJSON);
+        const { studentName, total, correct, wrong, score, grade, detailed, quizId, timestamp } = result;
+        const percentage = Math.round((correct / total) * 100);
+
+        // Fetch quiz title
+        let quizTitle = 'Quiz';
+        db.collection('quizzes').doc(quizId).get().then(doc => {
+          if (doc.exists) quizTitle = doc.data().title || 'Quiz';
+          renderResult(quizTitle);
+        }).catch(() => renderResult(quizTitle));
+
+        function renderResult(title) {
+          // Build question review
+          let reviewHtml = '';
+          if (detailed && detailed.length) {
+            reviewHtml = '<div class="question-review"><h4>📝 Question Review</h4>';
+            detailed.forEach((item, idx) => {
+              const statusClass = item.isCorrect ? 'correct' : 'wrong';
+              const statusText = item.isCorrect ? '✅ Correct' : '❌ Wrong';
+              reviewHtml += `
+                <div class="q-item">
+                  <span><strong>Q${idx+1}</strong> (Your Answer: ${item.userAnswer !== undefined ? item.userAnswer : 'N/A'})</span>
+                  <span class="status ${statusClass}">${statusText}</span>
+                </div>
+              `;
+            });
+            reviewHtml += '</div>';
+          }
+
+          container.innerHTML = `
+            <div class="result-score">${percentage}%</div>
+            <div class="result-grade">${grade || 'N/A'}</div>
+            <div class="result-details">
+              <span class="correct"><strong>${correct}</strong> Correct</span>
+              <span class="wrong"><strong>${wrong}</strong> Wrong</span>
+              <span class="total"><strong>${total}</strong> Total</span>
+            </div>
+            <p style="color:var(--color-text-secondary);margin-bottom:12px;">
+              ${percentage >= 70 ? '🎉 Excellent! You\'ve passed with flying colors.' :
+                percentage >= 40 ? '👍 Good effort! Keep practicing.' :
+                '📚 Don\'t give up! Review and try again.'}
+            </p>
+            ${reviewHtml}
+
+            <!-- Certificate -->
+            <div class="certificate-wrapper" id="certificateWrapper">
+              <div class="certificate-box" id="certificateBox">
+                <h2>🏆 Chemistry Point</h2>
+                <div class="cert-title">Certificate of Completion</div>
+                <p style="font-size:0.95rem;margin:4px 0;">This certifies that</p>
+                <h3 style="font-size:1.4rem;margin:4px 0;">${studentName || 'Student'}</h3>
+                <p style="font-size:0.95rem;margin:4px 0;">has successfully completed</p>
+                <p style="font-size:1.1rem;font-weight:var(--font-weight-bold);margin:4px 0;">${title}</p>
+                <div class="cert-details">
+                  <p><strong>Score:</strong> ${percentage}% | <strong>Grade:</strong> ${grade || 'N/A'}</p>
+                  <p><strong>Correct:</strong> ${correct} / ${total}</p>
+                  <p><strong>Date:</strong> ${new Date(timestamp || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                </div>
+                <div class="cert-footer" style="margin-top:16px; border-top:1px solid var(--color-border); padding-top:12px; font-size:0.85rem; color:var(--color-text-light);">
+                  🔬 Chemistry Point Examination System
+                </div>
+              </div>
+            </div>
+
+            <div class="cert-actions">
+              <button class="btn btn--primary" onclick="downloadPNG()">
+                <span class="material-symbols-rounded">image</span> Download PNG
+              </button>
+              <button class="btn btn--primary" onclick="downloadPDF()">
+                <span class="material-symbols-rounded">picture_as_pdf</span> Download PDF
+              </button>
+            </div>
+          `;
+        }
+      } catch (e) {
+        container.innerHTML = `<p style="color:var(--color-danger);">Error loading result: ${e.message}</p>`;
+      }
+    }
+
+    // ==========================================================
+    // DOWNLOAD FUNCTIONS
+    // ==========================================================
+    function downloadPNG() {
+      const el = document.getElementById('certificateBox');
+      html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false })
+        .then(canvas => {
+          const link = document.createElement('a');
+          link.download = `Certificate_${Date.now()}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        })
+        .catch(err => alert('PNG error: ' + err.message));
+    }
+
+    function downloadPDF() {
+      const el = document.getElementById('certificateBox');
+      html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false })
+        .then(canvas => {
+          const imgData = canvas.toDataURL('image/png');
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const imgWidth = 210;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+          pdf.save(`Certificate_${Date.now()}.pdf`);
+        })
+        .catch(err => alert('PDF error: ' + err.message));
+    }
+
+    // ==========================================================
+    // INIT
+    // ==========================================================
+    loadResult();
+  </script>
+</body>
+</html>

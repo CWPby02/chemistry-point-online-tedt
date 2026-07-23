@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz — CPES</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/layout.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <style>
+    .quiz-question { display:none; margin-bottom:24px; padding:20px; background:var(--color-surface); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); border:1px solid var(--color-border); }
+    .quiz-question.active { display:block; }
+    .quiz-options label { display:block; padding:10px 14px; border-radius:var(--radius-sm); border:1px solid var(--color-border); margin-bottom:6px; cursor:pointer; transition:background 0.2s; }
+    .quiz-options label:hover { background:var(--color-bg); }
+    .quiz-options input[type="radio"] { margin-right:10px; accent-color:var(--color-primary); transform:scale(1.1); }
+    .quiz-options label.selected { border-color:var(--color-primary); background:rgba(108,99,255,0.06); }
+    .quiz-timer { font-size:1.4rem; font-weight:var(--font-weight-bold); color:var(--color-primary); text-align:center; padding:12px; background:var(--color-bg); border-radius:var(--radius-sm); margin-bottom:20px; }
+    .quiz-timer.warning { color:var(--color-danger); animation:pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.6;} }
+    .quiz-nav { display:flex; justify-content:space-between; gap:12px; margin-top:20px; flex-wrap:wrap; }
+    .question-counter { text-align:center; font-size:0.9rem; color:var(--color-text-light); margin-bottom:12px; }
+    .quiz-submit-area { margin-top:24px; text-align:center; }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar__container container">
+      <a href="../index.html" class="navbar__brand">
+        <span class="navbar__logo-icon material-symbols-rounded">science</span>
+        <span class="navbar__brand-text">CPES</span>
+      </a>
+      <span style="font-weight:var(--font-weight-medium);color:var(--color-text-secondary);">Quiz</span>
+    </div>
+  </header>
+
+  <main style="padding:30px 0;">
+    <div class="container" style="max-width:760px;">
+      <div id="quizHeader">
+        <h2 id="quizTitle">Loading Quiz...</h2>
+        <div class="quiz-timer" id="timerDisplay">⏱️ 30:00</div>
+      </div>
+
+      <div id="quizContainer">
+        <div class="question-counter" id="questionCounter">Question 1 of 0</div>
+        <div id="questionsContainer"></div>
+
+        <div class="quiz-nav">
+          <button class="btn btn--outline" id="prevBtn" disabled>
+            <span class="material-symbols-rounded">arrow_back</span> Previous
+          </button>
+          <button class="btn btn--outline" id="nextBtn">
+            Next <span class="material-symbols-rounded">arrow_forward</span>
+          </button>
+        </div>
+
+        <div class="quiz-submit-area">
+          <button class="btn btn--primary btn--lg" id="submitBtn">
+            <span class="material-symbols-rounded">check_circle</span> Submit Quiz
+          </button>
+        </div>
+      </div>
+
+      <div id="quizMessage" style="margin-top:16px;"></div>
+    </div>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJxrqXisH2oBk8naB7TJMnGsoO2RIm6Tg",
+      authDomain: "cpes-a88a2.firebaseapp.com",
+      databaseURL: "https://cpes-a88a2-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "cpes-a88a2",
+      storageBucket: "cpes-a88a2.firebasestorage.app",
+      messagingSenderId: "350376945623",
+      appId: "1:350376945623:web:eb884eb5cdac3f05aa0d92"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const quizId = urlParams.get('quiz');
+
+    let questions = [];
+    let answerKey = {};
+    let currentIndex = 0;
+    let timeLimit = 30;
+    let timeRemaining = 0;
+    let timerInterval = null;
+    let isSubmitted = false;
+    let studentData = {};
+
+    const savedStudent = localStorage.getItem('cpes_student');
+    if (savedStudent) {
+      try { studentData = JSON.parse(savedStudent); } catch(e) {}
+    } else {
+      window.location.href = 'verify.html?quiz=' + quizId;
+    }
+
+    // ==========================================================
+    // LOAD QUIZ, SELECTED QUESTIONS & ANSWER KEY
+    // ==========================================================
+    async function loadQuiz() {
+      if (!quizId) {
+        document.getElementById('quizHeader').innerHTML = '<h2>Quiz ID missing</h2>';
+        return;
+      }
+
+      try {
+        // Load quiz details
+        const quizDoc = await db.collection('quizzes').doc(quizId).get();
+        if (!quizDoc.exists) {
+          document.getElementById('quizHeader').innerHTML = '<h2>Quiz not found</h2>';
+          return;
+        }
+        const quiz = quizDoc.data();
+        document.getElementById('quizTitle').textContent = quiz.title || 'Quiz';
+        timeLimit = quiz.duration || 30;
+        timeRemaining = timeLimit * 60;
+
+        // 🔥 Get selected question IDs from quiz
+        const questionIds = quiz.questionIds || [];
+        if (questionIds.length === 0) {
+          document.getElementById('questionsContainer').innerHTML = 
+            '<p class="text-muted" style="text-align:center;padding:20px 0;">No questions selected for this quiz. Please contact admin.</p>';
+          return;
+        }
+
+        // Fetch questions only for these IDs
+        const questionPromises = questionIds.map(id => db.collection('questions').doc(id).get());
+        const questionSnaps = await Promise.all(questionPromises);
+        const loadedQuestions = [];
+        questionSnaps.forEach((doc, idx) => {
+          if (doc.exists) {
+            const d = doc.data();
+            loadedQuestions.push({
+              id: doc.id,
+              question: d.question || 'Question',
+              options: d.options || ['A', 'B', 'C', 'D']
+            });
+          }
+        });
+
+        if (loadedQuestions.length === 0) {
+          document.getElementById('questionsContainer').innerHTML = 
+            '<p class="text-muted" style="text-align:center;padding:20px 0;">No questions found for this quiz.</p>';
+          return;
+        }
+
+        // Sort by numeric ID
+        loadedQuestions.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+        questions = loadedQuestions;
+
+        // 🔥 Load ANSWER KEY for these question IDs
+        const akPromises = questionIds.map(id => db.collection('answerKey').doc(id).get());
+        const akSnaps = await Promise.all(akPromises);
+        akSnaps.forEach(doc => {
+          if (doc.exists) {
+            answerKey[doc.id] = doc.data().correctOption;
+          }
+        });
+
+        renderQuestions();
+        startTimer();
+        updateUI();
+
+      } catch (err) {
+        console.error('Error loading quiz:', err);
+        document.getElementById('questionsContainer').innerHTML = 
+          `<p style="color:var(--color-danger);text-align:center;padding:20px 0;">Error: ${err.message}</p>`;
+      }
+    }
+
+    // ==========================================================
+    // RENDER QUESTIONS (same as before)
+    // ==========================================================
+    function renderQuestions() {
+      const container = document.getElementById('questionsContainer');
+      let html = '';
+      questions.forEach((q, index) => {
+        const activeClass = index === 0 ? 'active' : '';
+        html += `
+          <div class="quiz-question ${activeClass}" data-index="${index}">
+            <h4>Q${index + 1}. ${q.question}</h4>
+            <div class="quiz-options">
+              ${q.options.map((opt, i) => `
+                <label data-optindex="${i}">
+                  <input type="radio" name="q_${q.id}" value="${i}" />
+                  ${opt}
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+
+      container.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.addEventListener('change', function() {
+          const parentLabel = this.closest('label');
+          const siblings = parentLabel.closest('.quiz-options').querySelectorAll('label');
+          siblings.forEach(l => l.classList.remove('selected'));
+          if (this.checked) {
+            parentLabel.classList.add('selected');
+          }
+          saveProgress();
+        });
+      });
+
+      restoreProgress();
+      updateUI();
+    }
+
+    // Navigation (unchanged)
+    function updateUI() {
+      const total = questions.length;
+      if (total === 0) return;
+      document.getElementById('questionCounter').textContent = `Question ${currentIndex + 1} of ${total}`;
+      document.getElementById('prevBtn').disabled = (currentIndex === 0);
+      document.getElementById('nextBtn').textContent = (currentIndex === total - 1) ? 'Finish' : 'Next';
+      document.getElementById('nextBtn').innerHTML = (currentIndex === total - 1) ? 
+        'Finish <span class="material-symbols-rounded">done</span>' : 
+        'Next <span class="material-symbols-rounded">arrow_forward</span>';
+      document.querySelectorAll('.quiz-question').forEach(el => {
+        el.classList.remove('active');
+        if (parseInt(el.dataset.index) === currentIndex) {
+          el.classList.add('active');
+        }
+      });
+    }
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentIndex > 0) { currentIndex--; updateUI(); }
+    });
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        updateUI();
+      } else {
+        document.getElementById('submitBtn').scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+
+    // Progress (unchanged)
+    function saveProgress() {
+      const answers = {};
+      document.querySelectorAll('.quiz-question').forEach(qDiv => {
+        const radio = qDiv.querySelector('input[type="radio"]:checked');
+        if (radio) {
+          const name = radio.name;
+          const qId = name.replace('q_', '');
+          answers[qId] = parseInt(radio.value);
+        }
+      });
+      localStorage.setItem(`cpes_quiz_${quizId}_answers`, JSON.stringify(answers));
+    }
+    function restoreProgress() {
+      const saved = localStorage.getItem(`cpes_quiz_${quizId}_answers`);
+      if (!saved) return;
+      try {
+        const answers = JSON.parse(saved);
+        Object.keys(answers).forEach(qId => {
+          const val = answers[qId];
+          const radio = document.querySelector(`input[name="q_${qId}"][value="${val}"]`);
+          if (radio) {
+            radio.checked = true;
+            radio.dispatchEvent(new Event('change'));
+          }
+        });
+      } catch (e) {}
+    }
+
+    // Timer (unchanged)
+    function startTimer() {
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        updateTimerDisplay();
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById('timerDisplay').textContent = '⏱️ Time Up!';
+          document.getElementById('timerDisplay').classList.add('warning');
+          alert('Time is up! Submitting automatically.');
+          submitQuiz();
+        }
+      }, 1000);
+    }
+    function updateTimerDisplay() {
+      const mins = Math.floor(timeRemaining / 60);
+      const secs = timeRemaining % 60;
+      const display = document.getElementById('timerDisplay');
+      display.textContent = `⏱️ ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      if (timeRemaining < 60) {
+        display.classList.add('warning');
+      } else {
+        display.classList.remove('warning');
+      }
+    }
+
+    // Submit (unchanged, uses answerKey)
+    document.getElementById('submitBtn').addEventListener('click', () => {
+      if (confirm('Are you sure you want to submit? You cannot change answers after submission.')) {
+        submitQuiz();
+      }
+    });
+
+    function submitQuiz() {
+      if (isSubmitted) return;
+      isSubmitted = true;
+      if (timerInterval) clearInterval(timerInterval);
+
+      const msg = document.getElementById('quizMessage');
+      msg.innerHTML = '<div class="alert alert--info">⏳ Calculating your result...</div>';
+
+      const answers = {};
+      document.querySelectorAll('.quiz-question').forEach(qDiv => {
+        const radio = qDiv.querySelector('input[type="radio"]:checked');
+        if (radio) {
+          const name = radio.name;
+          const qId = name.replace('q_', '');
+          answers[qId] = parseInt(radio.value);
+        }
+      });
+
+      const questionIds = Object.keys(answers);
+      let correct = 0;
+      const total = questions.length;
+      const detailed = [];
+
+      questionIds.forEach(qId => {
+        const userAns = answers[qId];
+        const correctAns = answerKey[qId];
+        const isCorrect = (userAns === correctAns);
+        if (isCorrect) correct++;
+        detailed.push({
+          questionId: qId,
+          userAnswer: userAns,
+          correctAnswer: correctAns,
+          isCorrect
+        });
+      });
+
+      const score = Math.round((correct / total) * 100);
+      let grade = 'F';
+      if (score >= 90) grade = 'A+';
+      else if (score >= 75) grade = 'A';
+      else if (score >= 60) grade = 'B';
+      else if (score >= 45) grade = 'C';
+      else if (score >= 30) grade = 'D';
+
+      const resultData = {
+        studentName: studentData.name || 'Student',
+        studentMobile: studentData.mobile || '',
+        rollNumber: studentData.rollNumber || null,
+        quizId: quizId,
+        total: total,
+        correct: correct,
+        wrong: total - correct,
+        score: score,
+        grade: grade,
+        detailed: detailed,
+        timestamp: new Date().toISOString()
+      };
+
+      localStorage.setItem('cpes_result', JSON.stringify(resultData));
+
+      msg.innerHTML = '<div class="alert alert--success">✅ Quiz submitted! Redirecting to result...</div>';
+
+      setTimeout(() => {
+        window.location.href = 'result.html';
+      }, 1200);
+    }
+
+    // Keyboard shortcuts (unchanged)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' && !document.getElementById('nextBtn').disabled) {
+        document.getElementById('nextBtn').click();
+      } else if (e.key === 'ArrowLeft' && !document.getElementById('prevBtn').disabled) {
+        document.getElementById('prevBtn').click();
+      }
+    });
+
+    loadQuiz();
+  </script>
+</body>
+</html>

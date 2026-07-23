@@ -1,1 +1,490 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — CPES</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/layout.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <style>
+    /* Same styles as before (keep unchanged) */
+    .dashboard-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; border-bottom:2px solid var(--color-border); padding-bottom:12px; overflow-x:auto; }
+    .dashboard-tabs button { padding:8px 20px; border:none; border-radius:var(--radius-full); background:transparent; font-weight:var(--font-weight-medium); cursor:pointer; transition:all 0.2s; color:var(--color-text-secondary); white-space:nowrap; }
+    .dashboard-tabs button.active { background:var(--color-primary); color:#fff; }
+    .tab-content { display:none; } .tab-content.active { display:block; }
+    .table-wrapper { overflow-x:auto; background:var(--color-surface); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); padding:4px; margin-bottom:16px; }
+    table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+    table th { text-align:left; padding:12px 16px; background:var(--color-bg); font-weight:var(--font-weight-semibold); color:var(--color-text-secondary); border-bottom:2px solid var(--color-border); }
+    table td { padding:10px 16px; border-bottom:1px solid var(--color-border); vertical-align:middle; }
+    .badge-status { display:inline-block; padding:2px 12px; border-radius:var(--radius-full); font-size:0.75rem; font-weight:var(--font-weight-semibold); }
+    .badge-status.verified { background:#e8f8f0; color:#1a7d44; }
+    .badge-status.pending { background:#fef3e2; color:#b7791f; }
+    .action-btn { padding:4px 10px; border:none; border-radius:var(--radius-sm); cursor:pointer; font-size:0.8rem; font-weight:var(--font-weight-medium); transition:all 0.2s; margin:2px; }
+    .action-btn.edit { background:#e8f0fe; color:#1a3c7d; }
+    .action-btn.delete { background:#fde8e8; color:#a93226; }
+    .action-btn.verify { background:#e8f8f0; color:#1a7d44; }
+    .action-btn.process { background:#e8f0fe; color:#1a3c7d; }
+    .action-btn:hover { transform:scale(1.05); }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:var(--color-surface); border-radius:var(--radius-md); padding:32px 28px; max-width:700px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:var(--shadow-lg); position:relative; }
+    .modal-close { position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.6rem; cursor:pointer; color:var(--color-text-light); }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:16px; margin-bottom:24px; }
+    .stat-card { background:var(--color-surface); border-radius:var(--radius-md); padding:16px 20px; box-shadow:var(--shadow-sm); text-align:center; border-left:4px solid var(--color-primary); }
+    .stat-card .number { font-size:1.8rem; font-weight:var(--font-weight-bold); color:var(--color-text); }
+    .stat-card .label { font-size:0.85rem; color:var(--color-text-light); }
+    .file-upload-area { border:2px dashed var(--color-border); border-radius:var(--radius-md); padding:24px; text-align:center; margin:12px 0; background:var(--color-bg); cursor:pointer; transition:all 0.2s; }
+    .file-upload-area:hover { border-color:var(--color-primary); background:var(--color-surface); }
+    .file-upload-area input[type="file"] { display:none; }
+    .upload-status { margin-top:8px; font-weight:var(--font-weight-medium); }
+    .settings-group { background:var(--color-bg); border-radius:var(--radius-md); padding:16px 20px; margin-bottom:16px; }
+    .settings-group label { font-weight:var(--font-weight-medium); display:block; margin-bottom:4px; }
+    .settings-group input { width:100%; padding:10px 14px; border:1px solid var(--color-border); border-radius:var(--radius-sm); font-size:0.95rem; }
+    /* Multi-select styling */
+    .question-select { width:100%; padding:8px; border:1px solid var(--color-border); border-radius:var(--radius-sm); min-height:120px; background:var(--color-surface); }
+    .question-select option { padding:6px; border-bottom:1px solid var(--color-border); }
+    .question-select option:checked { background:var(--color-primary); color:#fff; }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR (unchanged) -->
+  <header class="navbar"><div class="navbar__container container"><a href="#" class="navbar__brand"><span class="navbar__logo-icon material-symbols-rounded">science</span><span class="navbar__brand-text">CPES Admin</span></a><div style="display:flex;align-items:center;gap:12px;"><span id="adminEmailDisplay" style="font-size:0.9rem;color:var(--color-text-light);"></span><button id="logoutBtn" class="btn btn--outline btn--sm"><span class="material-symbols-rounded">logout</span> Logout</button></div></div></header>
+  <main style="padding:30px 0;"><div class="container">
+    <!-- Stats (unchanged) -->
+    <div class="stats-grid"><div class="stat-card"><div class="number" id="statQuizzes">0</div><div class="label">Quizzes</div></div><div class="stat-card"><div class="number" id="statQuestions">0</div><div class="label">Questions</div></div><div class="stat-card"><div class="number" id="statPayments">0</div><div class="label">Payments</div></div><div class="stat-card"><div class="number" id="statSubmissions">0</div><div class="label">Submissions</div></div></div>
+    <!-- Tabs (unchanged) -->
+    <div class="dashboard-tabs">
+      <button class="active" data-tab="quizzes">📝 Quizzes</button>
+      <button data-tab="questions">📄 Questions</button>
+      <button data-tab="answerkey">🔑 Answer Key</button>
+      <button data-tab="payments">💰 Payments</button>
+      <button data-tab="submissions">📊 Submissions</button>
+      <button data-tab="notices">📢 Notices</button>
+      <button data-tab="settings">⚙️ Settings</button>
+    </div>
+    <!-- Quizzes Tab (unchanged) -->
+    <div class="tab-content active" id="tab-quizzes">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;"><h3>Manage Quizzes</h3><button class="btn btn--primary btn--sm" onclick="openModal('quizModal')"><span class="material-symbols-rounded">add</span> Add Quiz</button></div>
+      <div class="table-wrapper"><table><thead><tr><th>Title</th><th>Price</th><th>Duration</th><th>Questions</th><th>Actions</th></tr></thead><tbody id="quizzesTableBody"><tr><td colspan="5">Loading...</td></tr></tbody></table></div>
+    </div>
+    <!-- Questions Tab (unchanged) -->
+    <div class="tab-content" id="tab-questions">
+      <h3>Upload Questions (JSON)</h3>
+      <p class="text-muted">Format: [{"id":121, "question":"...", "options":["opt1","opt2","opt3","opt4"]}]</p>
+      <div class="file-upload-area" onclick="document.getElementById('questionsFileInput').click();"><span class="material-symbols-rounded" style="font-size:2rem;color:var(--color-primary);">cloud_upload</span><p>Click or drag to upload questions.json</p><input type="file" id="questionsFileInput" accept=".json" /></div>
+      <div id="questionsUploadStatus" class="upload-status"></div>
+      <div class="table-wrapper"><table><thead><tr><th>ID</th><th>Question</th><th>Options</th><th>Actions</th></tr></thead><tbody id="questionsTableBody"><tr><td colspan="4">No questions.</td></tr></tbody></table></div>
+    </div>
+    <!-- Answer Key Tab (unchanged) -->
+    <div class="tab-content" id="tab-answerkey">
+      <h3>Upload Answer Key (JSON)</h3>
+      <p class="text-muted">Format: {"121": 2, "122": 1, ...} (0-based index)</p>
+      <div class="file-upload-area" onclick="document.getElementById('answerKeyFileInput').click();"><span class="material-symbols-rounded" style="font-size:2rem;color:var(--color-primary);">cloud_upload</span><p>Click or drag to upload answerKey.json</p><input type="file" id="answerKeyFileInput" accept=".json" /></div>
+      <div id="answerKeyUploadStatus" class="upload-status"></div>
+      <div class="table-wrapper"><table><thead><tr><th>Question ID</th><th>Correct Option</th><th>Actions</th></tr></thead><tbody id="answerKeyTableBody"><tr><td colspan="3">No answer key.</td></tr></tbody></table></div>
+    </div>
+    <!-- Payments Tab (unchanged) -->
+    <div class="tab-content" id="tab-payments">
+      <h3>Payment Requests (UTR)</h3>
+      <div class="table-wrapper"><table><thead><tr><th>UTR</th><th>Student</th><th>Mobile</th><th>Quiz</th><th>Status</th><th>Action</th></tr></thead><tbody id="paymentsTableBody"><tr><td colspan="6">Loading...</td></tr></tbody></table></div>
+    </div>
+    <!-- Submissions Tab (unchanged) -->
+    <div class="tab-content" id="tab-submissions">
+      <h3>Pending Submissions</h3>
+      <div class="table-wrapper"><table><thead><tr><th>Student</th><th>Quiz</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody id="submissionsTableBody"><tr><td colspan="5">Loading...</td></tr></tbody></table></div>
+    </div>
+    <!-- Notices Tab (unchanged) -->
+    <div class="tab-content" id="tab-notices">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;"><h3>Notices</h3><button class="btn btn--primary btn--sm" onclick="openModal('noticeModal')"><span class="material-symbols-rounded">add</span> Add Notice</button></div>
+      <div class="table-wrapper"><table><thead><tr><th>Title</th><th>Tag</th><th>Date</th><th>Actions</th></tr></thead><tbody id="noticesTableBody"><tr><td colspan="4">Loading...</td></tr></tbody></table></div>
+    </div>
+    <!-- Settings Tab (unchanged) -->
+    <div class="tab-content" id="tab-settings">
+      <h3>Settings</h3>
+      <form id="settingsForm">
+        <div class="settings-group"><label>QR Code Image URL</label><input type="url" id="settingQrCode" placeholder="https://example.com/qr.png" /></div>
+        <div class="settings-group"><label>UPI ID</label><input type="text" id="settingUpiId" placeholder="chemistrypoint@upi" /></div>
+        <div class="settings-group"><label>Instagram ID</label><input type="text" id="settingInstaId" placeholder="@chemistrypoint" /></div>
+        <div class="settings-group"><label>WhatsApp Number</label><input type="text" id="settingWhatsApp" placeholder="+91 9876543210" /></div>
+        <button type="submit" class="btn btn--primary">💾 Save Settings</button>
+      </form>
+      <div id="settingsMessage" style="margin-top:12px;"></div>
+    </div>
+  </div></main>
+
+  <!-- ========== UPDATED QUIZ MODAL ========== -->
+  <div class="modal-overlay" id="quizModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('quizModal')">&times;</button>
+      <h3 id="quizModalTitle">Add Quiz</h3>
+      <form id="quizForm">
+        <input type="hidden" id="quizEditId" />
+        <div class="form-group"><label>Title</label><input type="text" id="quizTitle" class="form-control" required /></div>
+        <div class="form-group"><label>Description</label><input type="text" id="quizDesc" class="form-control" /></div>
+        <div class="form-group"><label>Price (₹)</label><input type="number" id="quizPrice" class="form-control" required /></div>
+        <div class="form-group"><label>Duration (minutes)</label><input type="number" id="quizDuration" class="form-control" value="30" required /></div>
+        <div class="form-group"><label>Password</label><input type="text" id="quizPassword" class="form-control" placeholder="Exam password" required /></div>
+        <div class="form-group"><label>Icon</label><input type="text" id="quizIcon" class="form-control" value="science" /></div>
+        <!-- 🔥 NEW: Question Selection -->
+        <div class="form-group">
+          <label>Select Questions (hold Ctrl/Cmd to select multiple)</label>
+          <select id="quizQuestionsSelect" class="question-select" multiple required>
+            <!-- Options will be populated dynamically -->
+          </select>
+          <small style="color:var(--color-text-light);">Select the questions you want in this quiz. You can select multiple.</small>
+        </div>
+        <button type="submit" class="btn btn--primary btn--block">Save Quiz</button>
+      </form>
+      <div id="quizModalMessage" style="margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <!-- Notice Modal (unchanged) -->
+  <div class="modal-overlay" id="noticeModal"><div class="modal-box"><button class="modal-close" onclick="closeModal('noticeModal')">&times;</button><h3>Add Notice</h3><form id="noticeForm"><div class="form-group"><label>Title</label><input type="text" id="noticeTitle" class="form-control" required /></div><div class="form-group"><label>Description</label><input type="text" id="noticeDesc" class="form-control" required /></div><div class="form-group"><label>Tag</label><input type="text" id="noticeTag" class="form-control" value="Update" /></div><div class="form-group"><label>Icon</label><input type="text" id="noticeIcon" class="form-control" value="campaign" /></div><button type="submit" class="btn btn--primary btn--block">Add Notice</button></form><div id="noticeModalMessage" style="margin-top:12px;"></div></div></div>
+
+  <script>
+    // Firebase Config (unchanged)
+    const firebaseConfig = { apiKey: "AIzaSyAJxrqXisH2oBk8naB7TJMnGsoO2RIm6Tg", authDomain: "cpes-a88a2.firebaseapp.com", databaseURL: "https://cpes-a88a2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "cpes-a88a2", storageBucket: "cpes-a88a2.firebasestorage.app", messagingSenderId: "350376945623", appId: "1:350376945623:web:eb884eb5cdac3f05aa0d92" };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Auth (unchanged)
+    auth.onAuthStateChanged(user => { if (!user) window.location.href='login.html'; else { document.getElementById('adminEmailDisplay').textContent = user.email; loadAllData(); } });
+    document.getElementById('logoutBtn').onclick = () => auth.signOut().then(() => window.location.href='login.html');
+
+    // Global functions (unchanged)
+    window.openModal = function(id, data) {
+      document.getElementById(id).classList.add('open');
+      if (id === 'quizModal' && data) {
+        document.getElementById('quizModalTitle').textContent = 'Edit Quiz';
+        document.getElementById('quizEditId').value = data.id;
+        document.getElementById('quizTitle').value = data.title || '';
+        document.getElementById('quizDesc').value = data.description || '';
+        document.getElementById('quizPrice').value = data.price || '';
+        document.getElementById('quizDuration').value = data.duration || 30;
+        document.getElementById('quizPassword').value = data.password || '';
+        document.getElementById('quizIcon').value = data.icon || 'science';
+        // Populate question select and pre-select
+        populateQuestionSelect(data.questionIds || []);
+      } else if (id === 'quizModal') {
+        document.getElementById('quizModalTitle').textContent = 'Add Quiz';
+        document.getElementById('quizEditId').value = '';
+        document.getElementById('quizForm').reset();
+        document.getElementById('quizDuration').value = 30;
+        document.getElementById('quizIcon').value = 'science';
+        populateQuestionSelect([]);
+      }
+      document.getElementById(id+'Message').innerHTML = '';
+    };
+    window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
+
+    // 🔥 Populate question multi-select
+    async function populateQuestionSelect(selectedIds) {
+      const select = document.getElementById('quizQuestionsSelect');
+      select.innerHTML = ''; // clear
+      try {
+        const snap = await db.collection('questions').get();
+        if (snap.empty) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = 'No questions uploaded yet. Please upload questions first.';
+          opt.disabled = true;
+          select.appendChild(opt);
+          return;
+        }
+        // Sort by ID
+        const docs = [];
+        snap.forEach(doc => docs.push({ id: doc.id, data: doc.data() }));
+        docs.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+        docs.forEach(({ id, data }) => {
+          const opt = document.createElement('option');
+          opt.value = id;
+          // Show question text truncated
+          const qText = data.question ? data.question.substring(0, 60) + (data.question.length > 60 ? '...' : '') : 'Question ' + id;
+          opt.textContent = `${id}. ${qText}`;
+          if (selectedIds && selectedIds.includes(id)) {
+            opt.selected = true;
+          }
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        console.error('Error loading questions for select:', err);
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Error loading questions.';
+        opt.disabled = true;
+        select.appendChild(opt);
+      }
+    }
+
+    // Data loading (unchanged except quizzes table shows count from questionIds array)
+    async function loadAllData() { await loadStats(); loadTableData('quizzes'); loadSettings(); }
+    async function loadStats() {
+      try {
+        const [qSnap, qsSnap, pSnap, sSnap] = await Promise.all([db.collection('quizzes').get(), db.collection('questions').get(), db.collection('payment').get(), db.collection('submissions').get()]);
+        document.getElementById('statQuizzes').textContent = qSnap.size;
+        document.getElementById('statQuestions').textContent = qsSnap.size;
+        document.getElementById('statPayments').textContent = pSnap.size;
+        document.getElementById('statSubmissions').textContent = sSnap.size;
+      } catch(e) { console.error(e); }
+    }
+
+    // Updated loadTableData – quizzes now show question count from questionIds array length
+    async function loadTableData(tab) {
+      const map = { quizzes:'quizzesTableBody', questions:'questionsTableBody', answerkey:'answerKeyTableBody', payments:'paymentsTableBody', submissions:'submissionsTableBody', notices:'noticesTableBody' };
+      const tbody = document.getElementById(map[tab]);
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="10">Loading...</td></tr>';
+      try {
+        let html = '';
+        if (tab === 'quizzes') {
+          const snap = await db.collection('quizzes').orderBy('createdAt','desc').get();
+          if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5">No quizzes.</td></tr>'; return; }
+          snap.forEach(doc => {
+            const d = doc.data();
+            const qCount = d.questionIds ? d.questionIds.length : 0;
+            html += `<tr><td><strong>${d.title||'Untitled'}</strong></td><td>₹${d.price||0}</td><td>${d.duration||30} min</td><td>${qCount}</td><td><button class="action-btn edit" onclick="openModal('quizModal',{id:'${doc.id}',title:'${d.title||''}',description:'${(d.description||'').replace(/'/g,"\\'")}',price:'${d.price||0}',duration:'${d.duration||30}',password:'${d.password||''}',icon:'${d.icon||'science'}',questionIds:${JSON.stringify(d.questionIds||[])}})">Edit</button><button class="action-btn delete" onclick="deleteQuiz('${doc.id}')">Delete</button></td></tr>`;
+          });
+        } else if (tab === 'questions') {
+          const snap = await db.collection('questions').get();
+          if (snap.empty) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--color-text-light);">No questions uploaded.</td></tr>'; return; }
+          const docs = [];
+          snap.forEach(doc => docs.push({ id: doc.id, data: doc.data() }));
+          docs.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+          docs.forEach(({ id, data: d }) => {
+            html += `<tr><td>${id}</td><td>${d.question || ''}</td><td>${d.options ? d.options.join(', ') : 'N/A'}</td><td><button class="action-btn delete" onclick="deleteQuestion('${id}')">Delete</button></td></tr>`;
+          });
+        } else if (tab === 'answerkey') {
+          const snap = await db.collection('answerKey').get();
+          if (snap.empty) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--color-text-light);">No answer key uploaded.</td></tr>'; return; }
+          const docs = [];
+          snap.forEach(doc => docs.push({ id: doc.id, data: doc.data() }));
+          docs.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+          docs.forEach(({ id, data: d }) => {
+            html += `<tr><td>${id}</td><td>${d.correctOption !== undefined ? d.correctOption : 'N/A'}</td><td><button class="action-btn delete" onclick="deleteAnswerKey('${id}')">Delete</button></td></tr>`;
+          });
+        } else if (tab === 'payments') {
+          const snap = await db.collection('payment').orderBy('createdAt','desc').limit(50).get();
+          if (snap.empty) { tbody.innerHTML = '<tr><td colspan="6">No payments.</td></tr>'; return; }
+          snap.forEach(doc => {
+            const d = doc.data();
+            const cls = d.verified?'verified':'pending';
+            const txt = d.verified?'✅ Verified':'⏳ Pending';
+            html += `<tr><td><code>${d.utr||d.transactionId||'N/A'}</code></td><td>${d.studentName||'N/A'}</td><td>${d.studentMobile||d.studentEmail||'N/A'}</td><td>${d.quizId||'N/A'}</td><td><span class="badge-status ${cls}">${txt}</span></td><td>${!d.verified?`<button class="action-btn verify" onclick="verifyPayment('${doc.id}')">✅ Verify</button>`:'✔️ Done'}<button class="action-btn delete" onclick="deletePayment('${doc.id}')">🗑️</button></td></tr>`;
+          });
+        } else if (tab === 'submissions') {
+          const snap = await db.collection('submissions').orderBy('submittedAt','desc').limit(50).get();
+          if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5">No submissions.</td></tr>'; return; }
+          snap.forEach(doc => {
+            const d = doc.data();
+            const proc = d.processed===true;
+            html += `<tr><td>${d.studentName||'N/A'}</td><td>${d.quizId||'N/A'}</td><td>${d.submittedAt?new Date(d.submittedAt).toLocaleString():'N/A'}</td><td>${proc?'✅ Processed':'⏳ Pending'}</td><td>${!proc?`<button class="action-btn process" onclick="processSubmission('${doc.id}')">📊 Process</button>`:'✔️ Done'}<button class="action-btn delete" onclick="deleteSubmission('${doc.id}')">🗑️</button></td></tr>`;
+          });
+        } else if (tab === 'notices') {
+          const snap = await db.collection('notices').orderBy('createdAt','desc').get();
+          if (snap.empty) { tbody.innerHTML = '<tr><td colspan="4">No notices.</td></tr>'; return; }
+          snap.forEach(doc => {
+            const d = doc.data();
+            html += `<tr><td><strong>${d.title||'Untitled'}</strong></td><td><span class="badge-status pending">${d.tag||'Update'}</span></td><td>${d.date||'N/A'}</td><td><button class="action-btn delete" onclick="deleteNotice('${doc.id}')">Delete</button></td></tr>`;
+          });
+        }
+        tbody.innerHTML = html;
+      } catch(err) { tbody.innerHTML = `<tr><td colspan="10">Error: ${err.message}</td></tr>`; console.error(err); }
+    }
+
+    // Quiz CRUD (updated to handle questionIds)
+    document.getElementById('quizForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const id = document.getElementById('quizEditId').value;
+      const select = document.getElementById('quizQuestionsSelect');
+      const selectedOptions = Array.from(select.selectedOptions);
+      const questionIds = selectedOptions.map(opt => opt.value).filter(v => v !== '');
+      if (questionIds.length === 0) {
+        document.getElementById('quizModalMessage').innerHTML = '<div class="alert alert--error">Please select at least one question.</div>';
+        return;
+      }
+      const data = {
+        title: document.getElementById('quizTitle').value.trim(),
+        description: document.getElementById('quizDesc').value.trim(),
+        price: parseInt(document.getElementById('quizPrice').value),
+        duration: parseInt(document.getElementById('quizDuration').value),
+        password: document.getElementById('quizPassword').value.trim(),
+        icon: document.getElementById('quizIcon').value.trim()||'science',
+        questionIds: questionIds,
+        updatedAt: new Date().toISOString()
+      };
+      const msg = document.getElementById('quizModalMessage');
+      try {
+        if (id) {
+          await db.collection('quizzes').doc(id).update(data);
+          msg.innerHTML = '<div class="alert alert--success">✅ Updated!</div>';
+        } else {
+          data.createdAt = new Date().toISOString();
+          await db.collection('quizzes').add(data);
+          msg.innerHTML = '<div class="alert alert--success">✅ Added!</div>';
+        }
+        setTimeout(() => { closeModal('quizModal'); loadTableData('quizzes'); loadStats(); }, 1000);
+      } catch(err) { msg.innerHTML = `<div class="alert alert--error">❌ ${err.message}</div>`; }
+    };
+    window.deleteQuiz = async function(id) { if(confirm('Delete?')) { try { await db.collection('quizzes').doc(id).delete(); loadTableData('quizzes'); loadStats(); } catch(e){alert(e.message);} } };
+
+    // Questions Upload (unchanged)
+    document.getElementById('questionsFileInput').onchange = async function(e) {
+      if (this.files.length) await uploadQuestionsFile(this.files[0]);
+      this.value = '';
+    };
+    async function uploadQuestionsFile(file) {
+      const status = document.getElementById('questionsUploadStatus');
+      status.innerHTML = '<span style="color:var(--color-info);">⏳ Reading...</span>';
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (!Array.isArray(data)) throw new Error('Must be array.');
+        if (data.length===0) throw new Error('Empty.');
+        data.forEach((q,i) => { if (!q.id || !q.question || !Array.isArray(q.options) || q.options.length!==4) throw new Error(`Invalid at ${i}`); });
+        status.innerHTML = `<span style="color:var(--color-info);">⏳ Uploading ${data.length} questions...</span>`;
+        const batchSize = 400;
+        let uploaded = 0;
+        for (let i=0; i<data.length; i+=batchSize) {
+          const chunk = data.slice(i, i+batchSize);
+          const batch = db.batch();
+          chunk.forEach(q => { const ref = db.collection('questions').doc(q.id.toString()); batch.set(ref, { question: q.question, options: q.options }); });
+          await batch.commit();
+          uploaded += chunk.length;
+          status.innerHTML = `<span style="color:var(--color-info);">⏳ Uploaded ${uploaded} of ${data.length}...</span>`;
+        }
+        status.innerHTML = `<span style="color:var(--color-success);">✅ ${data.length} questions uploaded!</span>`;
+        loadTableData('questions'); loadStats();
+      } catch(err) { status.innerHTML = `<span style="color:var(--color-danger);">❌ ${err.message}</span>`; console.error(err); }
+    }
+    window.deleteQuestion = async function(id) { if(confirm('Delete?')) { try { await db.collection('questions').doc(id).delete(); loadTableData('questions'); loadStats(); } catch(e){alert(e.message);} } };
+
+    // Answer Key Upload (unchanged)
+    document.getElementById('answerKeyFileInput').onchange = async function(e) {
+      if (this.files.length) await uploadAnswerKeyFile(this.files[0]);
+      this.value = '';
+    };
+    async function uploadAnswerKeyFile(file) {
+      const status = document.getElementById('answerKeyUploadStatus');
+      status.innerHTML = '<span style="color:var(--color-info);">⏳ Reading...</span>';
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (typeof data !== 'object' || Array.isArray(data)) throw new Error('Must be object.');
+        const entries = Object.entries(data);
+        if (entries.length===0) throw new Error('Empty.');
+        status.innerHTML = `<span style="color:var(--color-info);">⏳ Uploading ${entries.length} entries...</span>`;
+        const batchSize = 400;
+        let uploaded = 0;
+        for (let i=0; i<entries.length; i+=batchSize) {
+          const chunk = entries.slice(i, i+batchSize);
+          const batch = db.batch();
+          chunk.forEach(([qId, correct]) => { const ref = db.collection('answerKey').doc(qId); batch.set(ref, { correctOption: correct }); });
+          await batch.commit();
+          uploaded += chunk.length;
+          status.innerHTML = `<span style="color:var(--color-info);">⏳ Uploaded ${uploaded} of ${entries.length}...</span>`;
+        }
+        status.innerHTML = `<span style="color:var(--color-success);">✅ ${entries.length} entries uploaded!</span>`;
+        loadTableData('answerkey'); loadStats();
+      } catch(err) { status.innerHTML = `<span style="color:var(--color-danger);">❌ ${err.message}</span>`; console.error(err); }
+    }
+    window.deleteAnswerKey = async function(id) { if(confirm('Delete?')) { try { await db.collection('answerKey').doc(id).delete(); loadTableData('answerkey'); loadStats(); } catch(e){alert(e.message);} } };
+
+    // Payments (unchanged)
+    window.verifyPayment = async function(id) { try { await db.collection('payment').doc(id).update({verified:true, verifiedAt:new Date().toISOString()}); loadTableData('payments'); loadStats(); } catch(e){alert(e.message);} };
+    window.deletePayment = async function(id) { if(confirm('Delete?')) { try { await db.collection('payment').doc(id).delete(); loadTableData('payments'); loadStats(); } catch(e){alert(e.message);} } };
+
+    // Submissions (unchanged, but we keep manual process for existing)
+    window.processSubmission = async function(submissionId) {
+      if (!confirm('Process this submission?')) return;
+      try {
+        const subDoc = await db.collection('submissions').doc(submissionId).get();
+        if (!subDoc.exists) throw new Error('Not found');
+        const subData = subDoc.data();
+        const { quizId, answers, studentName, studentMobile, rollNumber } = subData;
+        const questionIds = Object.keys(answers);
+        if (questionIds.length===0) throw new Error('No answers.');
+        const answerKeys = {};
+        for (const qId of questionIds) {
+          const doc = await db.collection('answerKey').doc(qId).get();
+          if (doc.exists) answerKeys[qId] = doc.data().correctOption;
+        }
+        let correct = 0;
+        const total = questionIds.length;
+        const detailed = [];
+        questionIds.forEach(qId => {
+          const userAns = answers[qId];
+          const correctAns = answerKeys[qId];
+          const isCorrect = (userAns === correctAns);
+          if (isCorrect) correct++;
+          detailed.push({ questionId: qId, userAnswer: userAns, correctAnswer: correctAns, isCorrect });
+        });
+        const score = Math.round((correct/total)*100);
+        let grade = 'F'; if (score>=90) grade='A+'; else if (score>=75) grade='A'; else if (score>=60) grade='B'; else if (score>=45) grade='C'; else if (score>=30) grade='D';
+        const resultData = { submissionId, quizId, studentName, studentMobile, rollNumber: rollNumber||null, total, correct, wrong: total-correct, score, grade, detailed, processedAt: new Date().toISOString() };
+        await db.collection('results').add(resultData);
+        await db.collection('submissions').doc(submissionId).update({ processed: true, processedAt: new Date().toISOString(), result: resultData });
+        alert(`✅ Score: ${score}% (${correct}/${total}) Grade: ${grade}`);
+        loadTableData('submissions'); loadStats();
+      } catch(err) { alert(`❌ ${err.message}`); }
+    };
+    window.deleteSubmission = async function(id) { if(confirm('Delete?')) { try { await db.collection('submissions').doc(id).delete(); loadTableData('submissions'); loadStats(); } catch(e){alert(e.message);} } };
+
+    // Notices (unchanged)
+    document.getElementById('noticeForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = { title: document.getElementById('noticeTitle').value.trim(), description: document.getElementById('noticeDesc').value.trim(), tag: document.getElementById('noticeTag').value.trim()||'Update', icon: document.getElementById('noticeIcon').value.trim()||'campaign', date: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}), createdAt: new Date().toISOString() };
+      const msg = document.getElementById('noticeModalMessage');
+      try { await db.collection('notices').add(data); msg.innerHTML = '<div class="alert alert--success">✅ Notice added!</div>'; setTimeout(()=>{ closeModal('noticeModal'); loadTableData('notices'); }, 1000); } catch(err) { msg.innerHTML = `<div class="alert alert--error">❌ ${err.message}</div>`; }
+    };
+    window.deleteNotice = async function(id) { if(confirm('Delete?')) { try { await db.collection('notices').doc(id).delete(); loadTableData('notices'); } catch(e){alert(e.message);} } };
+
+    // Settings (unchanged)
+    async function loadSettings() {
+      try {
+        const doc = await db.collection('settings').doc('settings').get();
+        if (doc.exists) {
+          const d = doc.data();
+          document.getElementById('settingQrCode').value = d.qrCodeUrl || '';
+          document.getElementById('settingUpiId').value = d.upiId || '';
+          document.getElementById('settingInstaId').value = d.instaId || '';
+          document.getElementById('settingWhatsApp').value = d.whatsApp || '';
+        }
+      } catch(e) { console.error(e); }
+    }
+    document.getElementById('settingsForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = { qrCodeUrl: document.getElementById('settingQrCode').value.trim(), upiId: document.getElementById('settingUpiId').value.trim(), instaId: document.getElementById('settingInstaId').value.trim(), whatsApp: document.getElementById('settingWhatsApp').value.trim(), updatedAt: new Date().toISOString() };
+      const msg = document.getElementById('settingsMessage');
+      try { await db.collection('settings').doc('settings').set(data, {merge: true}); msg.innerHTML = '<div class="alert alert--success">✅ Settings saved!</div>'; } catch(err) { msg.innerHTML = `<div class="alert alert--error">❌ ${err.message}</div>`; }
+    };
+
+    // Tabs (unchanged)
+    document.querySelectorAll('.dashboard-tabs button').forEach(btn => {
+      btn.onclick = function() {
+        document.querySelectorAll('.dashboard-tabs button').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const tab = this.dataset.tab;
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.getElementById(`tab-${tab}`).classList.add('active');
+        loadTableData(tab);
+      };
+    });
+
+    // Close modal on overlay click (unchanged)
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+      el.addEventListener('click', function(e) { if (e.target === this) closeModal(this.id); });
+    });
+
+    // Init
+    loadAllData();
+  </script>
+</body>
+</html>

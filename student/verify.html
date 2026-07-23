@@ -1,0 +1,185 @@
+<!-- ==========================================================
+student/verify.html
+CPES — Password Verification + Student Details (LocalStorage)
+========================================================== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify — CPES</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/layout.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <header class="navbar" role="banner">
+    <div class="navbar__container container">
+      <a href="../index.html" class="navbar__brand">
+        <span class="navbar__logo-icon material-symbols-rounded">science</span>
+        <span class="navbar__brand-text">CPES</span>
+      </a>
+      <a href="payment.html" class="btn btn--outline btn--sm">
+        <span class="material-symbols-rounded">arrow_back</span> Back
+      </a>
+    </div>
+  </header>
+
+  <main style="padding: 40px 0;">
+    <div class="container" style="max-width: 480px;">
+
+      <div class="glass-card">
+        <!-- Step 1: Password -->
+        <div id="passwordSection">
+          <h2 style="display:flex;align-items:center;gap:10px;">
+            <span class="material-symbols-rounded" style="color:var(--color-primary);">password</span>
+            Enter Quiz Password
+          </h2>
+          <p class="text-muted">Enter the password you received from admin after payment verification.</p>
+
+          <form id="passwordForm">
+            <div class="form-group">
+              <label for="quizPassword">Password</label>
+              <input type="text" id="quizPassword" class="form-control" placeholder="e.g. CHEM123" required />
+            </div>
+            <button type="submit" class="btn btn--primary btn--block btn--lg">
+              <span class="material-symbols-rounded">login</span> Verify Password
+            </button>
+          </form>
+          <div id="passwordMessage" style="margin-top:12px;"></div>
+        </div>
+
+        <!-- Step 2: Student Details (hidden initially) -->
+        <div id="detailsSection" style="display:none;">
+          <h2 style="display:flex;align-items:center;gap:10px;">
+            <span class="material-symbols-rounded" style="color:var(--color-primary);">person</span>
+            Your Details
+          </h2>
+          <p class="text-muted">Please fill your details to start the quiz. These will be used for your certificate.</p>
+
+          <form id="detailsForm">
+            <div class="form-group">
+              <label for="studentName">Full Name *</label>
+              <input type="text" id="studentName" class="form-control" placeholder="Your full name" required />
+            </div>
+            <div class="form-group">
+              <label for="studentMobile">Mobile Number *</label>
+              <input type="tel" id="studentMobile" class="form-control" placeholder="+91 9876543210" required />
+            </div>
+            <div class="form-group">
+              <label for="studentRoll">Roll Number <span style="font-weight:normal;color:var(--color-text-light);">(Optional - only if you have admission)</span></label>
+              <input type="text" id="studentRoll" class="form-control" placeholder="e.g. 2024CS001" />
+            </div>
+            <button type="submit" class="btn btn--primary btn--block btn--lg">
+              <span class="material-symbols-rounded">play_arrow</span> Start Quiz
+            </button>
+          </form>
+          <div id="detailsMessage" style="margin-top:12px;"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJxrqXisH2oBk8naB7TJMnGsoO2RIm6Tg",
+      authDomain: "cpes-a88a2.firebaseapp.com",
+      databaseURL: "https://cpes-a88a2-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "cpes-a88a2",
+      storageBucket: "cpes-a88a2.firebasestorage.app",
+      messagingSenderId: "350376945623",
+      appId: "1:350376945623:web:eb884eb5cdac3f05aa0d92"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const quizId = urlParams.get('quiz');
+    let quizData = null;
+
+    // ==========================================================
+    // PASSWORD VERIFICATION
+    // ==========================================================
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('quizPassword').value.trim();
+      const msg = document.getElementById('passwordMessage');
+
+      if (!quizId) {
+        msg.innerHTML = '<div class="alert alert--error">Quiz ID missing. Please go back.</div>';
+        return;
+      }
+
+      if (!password) {
+        msg.innerHTML = '<div class="alert alert--error">Please enter the password.</div>';
+        return;
+      }
+
+      msg.innerHTML = '<div class="alert alert--info">Verifying password...</div>';
+
+      try {
+        const doc = await db.collection('quizzes').doc(quizId).get();
+        if (!doc.exists) {
+          msg.innerHTML = '<div class="alert alert--error">Quiz not found.</div>';
+          return;
+        }
+        quizData = doc.data();
+        if (quizData.password === password) {
+          msg.innerHTML = '<div class="alert alert--success">✅ Password correct! Please fill your details.</div>';
+          // Show details section, hide password section
+          document.getElementById('passwordSection').style.display = 'none';
+          document.getElementById('detailsSection').style.display = 'block';
+        } else {
+          msg.innerHTML = '<div class="alert alert--error">❌ Incorrect password. Please try again.</div>';
+        }
+      } catch (err) {
+        msg.innerHTML = `<div class="alert alert--error">❌ ${err.message}</div>`;
+      }
+    });
+
+    // ==========================================================
+    // STUDENT DETAILS SUBMIT (Save to LocalStorage)
+    // ==========================================================
+    document.getElementById('detailsForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('studentName').value.trim();
+      const mobile = document.getElementById('studentMobile').value.trim();
+      const roll = document.getElementById('studentRoll').value.trim();
+      const msg = document.getElementById('detailsMessage');
+
+      if (!name || !mobile) {
+        msg.innerHTML = '<div class="alert alert--error">Name and Mobile are required.</div>';
+        return;
+      }
+
+      // Save to localStorage
+      const studentData = {
+        name: name,
+        mobile: mobile,
+        rollNumber: roll || null,
+        quizId: quizId,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('cpes_student', JSON.stringify(studentData));
+
+      msg.innerHTML = '<div class="alert alert--success">✅ Details saved! Redirecting to quiz...</div>';
+
+      setTimeout(() => {
+        window.location.href = `quiz.html?quiz=${quizId}`;
+      }, 1200);
+    });
+
+    // Check if already logged in (skip password if already verified in session?)
+    // But we keep it strict - password required every time.
+  </script>
+
+</body>
+</html>

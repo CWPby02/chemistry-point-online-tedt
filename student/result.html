@@ -27,46 +27,41 @@
     .q-item .status.wrong { color:var(--color-danger); }
 
     /* ==========================================================
-       STRICT SQUARE CERTIFICATE (1:1)
+       PREMIUM RECTANGLE CERTIFICATE (NO CROP)
        ========================================================== */
     .certificate-wrapper {
       margin-top: 24px;
-      padding: 12px;
-      background: linear-gradient(135deg, #f5f0e1, #e8dcc8);
+      padding: 16px;
+      background: linear-gradient(145deg, #e8e0d0, #d5cbb8);
       border-radius: var(--radius-md);
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
       display: flex;
       justify-content: center;
-      align-items: center;
     }
 
     .certificate-box {
       width: 100%;
-      max-width: 500px;
-      aspect-ratio: 1 / 1; /* Force square */
-      background: #fff;
-      padding: 16px 14px 12px;
+      max-width: 700px;
+      background: #ffffff;
+      padding: 28px 32px 24px;
       border-radius: 12px;
-      border: 6px double #b8860b;
+      border: 8px double #c9a84c;
       position: relative;
-      box-shadow: 0 0 0 2px #b8860b inset, 0 0 0 4px #f5e6c8 inset;
+      box-shadow: 0 0 0 3px #c9a84c inset, 0 0 0 6px #f3edd8 inset;
       text-align: center;
       font-family: 'Georgia', 'Times New Roman', serif;
       box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow: hidden;
     }
 
+    /* Decorative inner border */
     .certificate-box::before {
       content: '';
       position: absolute;
-      top: 6px;
-      left: 6px;
-      right: 6px;
-      bottom: 6px;
-      border: 2px solid #d4a843;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      border: 2px solid #dbb86c;
       border-radius: 8px;
       pointer-events: none;
     }
@@ -75,147 +70,195 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 2px;
-      border-bottom: 2px solid #b8860b;
-      padding-bottom: 3px;
-      flex-wrap: wrap;
+      margin-bottom: 6px;
+      border-bottom: 3px solid #c9a84c;
+      padding-bottom: 6px;
     }
-    .cert-top-decoration .cert-logo { font-size: 1.2rem; color: #b8860b; }
-    .cert-top-decoration .cert-serial { font-size: 0.55rem; color: #999; font-family: 'Courier New', monospace; }
+    .cert-top-decoration .cert-logo {
+      font-size: 2rem;
+      color: #c9a84c;
+    }
+    .cert-top-decoration .cert-serial {
+      font-size: 0.75rem;
+      color: #999;
+      font-family: 'Courier New', monospace;
+      background: #f5f0e6;
+      padding: 2px 12px;
+      border-radius: 20px;
+    }
 
-    .cert-institute { font-size: 1.1rem; font-weight: bold; color: #1a1a2e; letter-spacing: 1px; margin-bottom: 0px; line-height: 1.2; }
-    .cert-institute span { color: #b8860b; }
-    .cert-subtitle { font-size: 0.6rem; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2px; }
-
-    .cert-main-title {
-      font-size: 1.2rem;
+    .cert-institute {
+      font-size: 1.8rem;
       font-weight: bold;
       color: #1a1a2e;
-      letter-spacing: 3px;
+      letter-spacing: 2px;
+      margin-bottom: 2px;
+    }
+    .cert-institute span { color: #c9a84c; }
+
+    .cert-subtitle {
+      font-size: 0.85rem;
+      color: #888;
+      letter-spacing: 4px;
       text-transform: uppercase;
-      border-top: 2px solid #b8860b;
-      border-bottom: 2px solid #b8860b;
+      margin-bottom: 6px;
+    }
+
+    .cert-main-title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1a1a2e;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      border-top: 3px solid #c9a84c;
+      border-bottom: 3px solid #c9a84c;
       display: inline-block;
-      padding: 1px 10px;
-      margin-bottom: 3px;
-      background: linear-gradient(135deg, #fdf6e3, #f5e6c8);
-      line-height: 1.3;
+      padding: 6px 24px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fdf8ee, #f5eddb);
     }
 
     .cert-student-name {
-      font-size: 1.4rem;
+      font-size: 2.2rem;
       font-weight: bold;
       color: #1a1a2e;
-      margin: 2px 0 0px;
-      border-bottom: 2px dashed #d4a843;
+      margin: 6px 0 4px;
+      border-bottom: 3px dashed #dbb86c;
       display: inline-block;
-      padding: 0 10px 2px;
-      line-height: 1.2;
+      padding: 0 20px 6px;
     }
 
-    .cert-completion-text { font-size: 0.7rem; color: #333; margin: 2px 0; line-height: 1.3; }
-    .cert-completion-text strong { color: #1a1a2e; font-size: 0.8rem; }
+    .cert-completion-text {
+      font-size: 1rem;
+      color: #333;
+      margin: 6px 0;
+    }
+    .cert-completion-text strong {
+      color: #1a1a2e;
+      font-size: 1.1rem;
+    }
 
     .cert-details-row {
       display: flex;
       justify-content: center;
-      gap: 6px;
+      gap: 20px;
       flex-wrap: wrap;
-      margin: 3px 0 4px;
-      font-size: 0.65rem;
+      margin: 10px 0 14px;
+      font-size: 0.95rem;
       color: #444;
     }
-    .cert-details-row span { background: #f8f4ec; padding: 1px 8px; border-radius: 20px; border: 1px solid #e0d5c0; }
+    .cert-details-row span {
+      background: #f5f0e6;
+      padding: 4px 18px;
+      border-radius: 30px;
+      border: 1px solid #e0d5c0;
+    }
     .cert-details-row strong { color: #1a1a2e; }
 
     .cert-grade-badge {
       display: inline-block;
-      background: linear-gradient(135deg, #b8860b, #d4a843);
+      background: linear-gradient(135deg, #c9a84c, #b8923a);
       color: #fff;
-      font-size: 1rem;
+      font-size: 1.8rem;
       font-weight: bold;
-      padding: 2px 14px;
-      border-radius: 8px;
-      margin: 2px 0 3px;
-      letter-spacing: 1px;
+      padding: 4px 28px;
+      border-radius: 12px;
+      margin: 6px 0 12px;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 10px rgba(201,168,76,0.3);
     }
 
     .cert-footer {
-      margin-top: 3px;
-      padding-top: 4px;
-      border-top: 2px solid #e0d5c0;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 3px solid #e0d5c0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.6rem;
+      font-size: 0.9rem;
       color: #555;
       flex-wrap: wrap;
-      gap: 3px;
+      gap: 8px;
     }
-    .cert-footer .cert-director { font-weight: bold; color: #1a1a2e; }
-    .cert-footer .cert-director small { font-weight: normal; color: #777; display: block; font-size: 0.5rem; }
-    .cert-footer .cert-seal { font-size: 1.4rem; color: #b8860b; opacity: 0.7; }
-    .cert-footer .cert-date { font-size: 0.55rem; color: #888; }
+    .cert-footer .cert-director {
+      font-weight: bold;
+      color: #1a1a2e;
+    }
+    .cert-footer .cert-director small {
+      font-weight: normal;
+      color: #888;
+      display: block;
+      font-size: 0.7rem;
+    }
+    .cert-footer .cert-seal {
+      font-size: 2.5rem;
+      color: #c9a84c;
+      opacity: 0.7;
+    }
+    .cert-footer .cert-date {
+      font-size: 0.85rem;
+      color: #888;
+    }
 
+    /* Stamp */
     .cert-stamp {
       position: absolute;
-      bottom: 18px;
-      right: 14px;
-      width: 50px;
-      height: 50px;
+      bottom: 40px;
+      right: 30px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
-      border: 3px solid rgba(184, 134, 11, 0.25);
+      border: 4px solid rgba(201,168,76,0.3);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.4rem;
-      color: rgba(184, 134, 11, 0.35);
+      font-size: 0.6rem;
+      color: rgba(201,168,76,0.35);
       font-weight: bold;
       text-transform: uppercase;
       transform: rotate(-15deg);
       pointer-events: none;
-      background: rgba(184, 134, 11, 0.05);
+      background: rgba(201,168,76,0.05);
       font-family: 'Georgia', serif;
-      padding: 4px;
+      padding: 10px;
       text-align: center;
       line-height: 1.2;
     }
 
     .cert-actions {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       justify-content: center;
       flex-wrap: wrap;
       margin-top: 16px;
     }
 
-    .no-result { text-align: center; padding: 40px 20px; }
-    .no-result .material-symbols-rounded { font-size: 4rem; color: var(--color-warning); }
+    .no-result {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .no-result .material-symbols-rounded {
+      font-size: 4rem;
+      color: var(--color-warning);
+    }
 
-    /* Responsive */
-    @media (max-width: 550px) {
-      .certificate-box { max-width: 100%; padding: 12px 10px 10px; border-width: 4px; aspect-ratio: 1 / 1; }
-      .certificate-box::before { top: 4px; left: 4px; right: 4px; bottom: 4px; border-width: 1px; }
-      .cert-institute { font-size: 0.9rem; }
-      .cert-main-title { font-size: 1rem; letter-spacing: 2px; padding: 1px 8px; }
-      .cert-student-name { font-size: 1.1rem; padding: 0 8px 1px; }
-      .cert-completion-text { font-size: 0.6rem; }
-      .cert-completion-text strong { font-size: 0.7rem; }
-      .cert-details-row { font-size: 0.55rem; gap: 4px; }
-      .cert-details-row span { padding: 1px 6px; }
-      .cert-grade-badge { font-size: 0.9rem; padding: 2px 10px; }
-      .cert-footer { font-size: 0.5rem; flex-direction: column; align-items: center; text-align: center; }
-      .cert-footer .cert-director small { font-size: 0.45rem; }
-      .cert-footer .cert-seal { font-size: 1rem; }
-      .cert-footer .cert-date { font-size: 0.5rem; }
-      .cert-stamp { width: 40px; height: 40px; font-size: 0.35rem; bottom: 12px; right: 10px; border-width: 2px; padding: 3px; }
-      .cert-top-decoration .cert-logo { font-size: 1rem; }
-      .cert-top-decoration .cert-serial { font-size: 0.4rem; }
+    @media (max-width: 600px) {
+      .certificate-box { padding: 18px 14px 16px; }
+      .cert-institute { font-size: 1.4rem; }
+      .cert-main-title { font-size: 1.4rem; letter-spacing: 3px; padding: 4px 12px; }
+      .cert-student-name { font-size: 1.6rem; }
+      .cert-completion-text { font-size: 0.85rem; }
+      .cert-details-row { font-size: 0.8rem; gap: 10px; }
+      .cert-grade-badge { font-size: 1.4rem; padding: 3px 18px; }
+      .cert-footer { font-size: 0.75rem; flex-direction: column; align-items: center; }
+      .cert-stamp { width: 60px; height: 60px; font-size: 0.5rem; bottom: 24px; right: 16px; }
+      .cert-top-decoration .cert-logo { font-size: 1.5rem; }
+      .cert-top-decoration .cert-serial { font-size: 0.6rem; }
     }
     @media (max-width: 400px) {
-      .cert-main-title { font-size: 0.8rem; letter-spacing: 1px; }
-      .cert-student-name { font-size: 0.9rem; }
-      .cert-details-row span { font-size: 0.5rem; }
+      .cert-main-title { font-size: 1.1rem; letter-spacing: 1px; }
+      .cert-student-name { font-size: 1.2rem; }
+      .cert-details-row span { font-size: 0.7rem; padding: 2px 10px; }
     }
   </style>
 </head>
@@ -261,13 +304,7 @@
       const container = document.getElementById('resultContent');
       const resultJSON = localStorage.getItem('cpes_result');
       if (!resultJSON) {
-        container.innerHTML = `
-          <div class="no-result">
-            <span class="material-symbols-rounded">hourglass_empty</span>
-            <h3>No result found</h3>
-            <p class="text-muted">Please complete a quiz first.</p>
-          </div>
-        `;
+        container.innerHTML = `<div class="no-result"><span class="material-symbols-rounded">hourglass_empty</span><h3>No result found</h3><p class="text-muted">Please complete a quiz first.</p></div>`;
         return;
       }
 
@@ -289,21 +326,12 @@
             detailed.forEach((item, idx) => {
               const statusClass = item.isCorrect ? 'correct' : 'wrong';
               const statusText = item.isCorrect ? '✅ Correct' : '❌ Wrong';
-              reviewHtml += `
-                <div class="q-item">
-                  <span><strong>Q${idx+1}</strong> (Your Answer: ${item.userAnswer !== undefined ? item.userAnswer : 'N/A'})</span>
-                  <span class="status ${statusClass}">${statusText}</span>
-                </div>
-              `;
+              reviewHtml += `<div class="q-item"><span><strong>Q${idx+1}</strong> (Your Answer: ${item.userAnswer !== undefined ? item.userAnswer : 'N/A'})</span><span class="status ${statusClass}">${statusText}</span></div>`;
             });
             reviewHtml += '</div>';
           }
 
-          const dateStr = new Date(timestamp || Date.now()).toLocaleDateString('en-IN', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-          });
+          const dateStr = new Date(timestamp || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
           container.innerHTML = `
             <div class="result-score">${percentage}%</div>
@@ -320,7 +348,7 @@
             </p>
             ${reviewHtml}
 
-            <!-- SQUARE CERTIFICATE -->
+            <!-- PREMIUM CERTIFICATE -->
             <div class="certificate-wrapper" id="certificateWrapper">
               <div class="certificate-box" id="certificateBox">
                 <div class="cert-top-decoration">
@@ -361,11 +389,10 @@
     }
 
     // ==========================================================
-    // DOWNLOAD FUNCTIONS – FIXED (NO CROP, FULL SQUARE)
+    // DOWNLOAD FUNCTIONS – FULL CAPTURE, NO CROP
     // ==========================================================
     function downloadPNG() {
       const el = document.getElementById('certificateBox');
-      // Ensure the element is fully rendered
       html2canvas(el, {
         scale: 3,
         backgroundColor: '#ffffff',
@@ -376,7 +403,6 @@
         windowWidth: el.scrollWidth,
         windowHeight: el.scrollHeight
       }).then(canvas => {
-        // Directly use the canvas as is (it's already square)
         const link = document.createElement('a');
         link.download = `Certificate_${Date.now()}.png`;
         link.href = canvas.toDataURL('image/png');
@@ -398,12 +424,12 @@
       }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const { jsPDF } = window.jspdf;
-        // Square PDF
-        const pdf = new jsPDF('p', 'mm', [210, 210]);
-        const imgSize = 190;
-        const x = (210 - imgSize) / 2;
-        const y = (210 - imgSize) / 2;
-        pdf.addImage(imgData, 'PNG', x, y, imgSize, imgSize);
+        const pdf = new jsPDF('l', 'mm', 'a4');
+        const imgWidth = 280;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const x = (297 - imgWidth) / 2;
+        const y = (210 - imgHeight) / 2;
+        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
         pdf.save(`Certificate_${Date.now()}.pdf`);
       }).catch(err => alert('PDF error: ' + err.message));
     }
@@ -430,7 +456,7 @@
               files: [file]
             }).catch(() => {});
           } else {
-            alert('Share not supported on this browser. Please use the download option.');
+            alert('Share not supported on this browser.');
           }
         });
       }).catch(err => alert('Share error: ' + err.message));

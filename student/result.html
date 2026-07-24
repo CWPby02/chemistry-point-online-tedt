@@ -27,7 +27,7 @@
     .q-item .status.wrong { color:var(--color-danger); }
 
     /* ==========================================================
-       SQUARE CERTIFICATE (1:1 ASPECT RATIO)
+       STRICT SQUARE CERTIFICATE (1:1) – NO RECTANGLE
        ========================================================== */
     .certificate-wrapper {
       margin-top: 24px;
@@ -37,14 +37,15 @@
       box-shadow: var(--shadow-lg);
       display: flex;
       justify-content: center;
+      align-items: center;
     }
 
     .certificate-box {
       width: 100%;
-      max-width: 500px; /* Square size */
-      aspect-ratio: 1 / 1; /* Square */
+      max-width: 500px;
+      aspect-ratio: 1 / 1; /* Force square */
       background: #fff;
-      padding: 20px 18px 16px;
+      padding: 16px 14px 12px;
       border-radius: 12px;
       border: 6px double #b8860b;
       position: relative;
@@ -55,16 +56,17 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      overflow: hidden; /* prevent content spill */
     }
 
     /* Decorative border inner */
     .certificate-box::before {
       content: '';
       position: absolute;
-      top: 8px;
-      left: 8px;
-      right: 8px;
-      bottom: 8px;
+      top: 6px;
+      left: 6px;
+      right: 6px;
+      bottom: 6px;
       border: 2px solid #d4a843;
       border-radius: 8px;
       pointer-events: none;
@@ -77,33 +79,33 @@
       align-items: center;
       margin-bottom: 2px;
       border-bottom: 2px solid #b8860b;
-      padding-bottom: 4px;
+      padding-bottom: 3px;
       flex-wrap: wrap;
     }
     .cert-top-decoration .cert-logo {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       color: #b8860b;
     }
     .cert-top-decoration .cert-serial {
-      font-size: 0.6rem;
+      font-size: 0.55rem;
       color: #999;
       font-family: 'Courier New', monospace;
     }
 
     /* Institute Name */
     .cert-institute {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: bold;
       color: #1a1a2e;
       letter-spacing: 1px;
       margin-bottom: 0px;
+      line-height: 1.2;
     }
     .cert-institute span {
       color: #b8860b;
     }
-
     .cert-subtitle {
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       color: #666;
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -112,7 +114,7 @@
 
     /* Main title */
     .cert-main-title {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       font-weight: bold;
       color: #1a1a2e;
       letter-spacing: 3px;
@@ -120,46 +122,49 @@
       border-top: 2px solid #b8860b;
       border-bottom: 2px solid #b8860b;
       display: inline-block;
-      padding: 2px 12px;
-      margin-bottom: 4px;
+      padding: 1px 10px;
+      margin-bottom: 3px;
       background: linear-gradient(135deg, #fdf6e3, #f5e6c8);
+      line-height: 1.3;
     }
 
     /* Student name */
     .cert-student-name {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       font-weight: bold;
       color: #1a1a2e;
       margin: 2px 0 0px;
       border-bottom: 2px dashed #d4a843;
       display: inline-block;
-      padding: 0 12px 2px;
+      padding: 0 10px 2px;
+      line-height: 1.2;
     }
 
     /* Completion text */
     .cert-completion-text {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       color: #333;
       margin: 2px 0;
+      line-height: 1.3;
     }
     .cert-completion-text strong {
       color: #1a1a2e;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
     }
 
     /* Details row */
     .cert-details-row {
       display: flex;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
-      margin: 4px 0 6px;
-      font-size: 0.75rem;
+      margin: 3px 0 4px;
+      font-size: 0.65rem;
       color: #444;
     }
     .cert-details-row span {
       background: #f8f4ec;
-      padding: 1px 10px;
+      padding: 1px 8px;
       border-radius: 20px;
       border: 1px solid #e0d5c0;
     }
@@ -172,26 +177,26 @@
       display: inline-block;
       background: linear-gradient(135deg, #b8860b, #d4a843);
       color: #fff;
-      font-size: 1.2rem;
+      font-size: 1rem;
       font-weight: bold;
-      padding: 2px 16px;
+      padding: 2px 14px;
       border-radius: 8px;
-      margin: 2px 0 4px;
+      margin: 2px 0 3px;
       letter-spacing: 1px;
     }
 
     /* Footer */
     .cert-footer {
-      margin-top: 4px;
-      padding-top: 6px;
+      margin-top: 3px;
+      padding-top: 4px;
       border-top: 2px solid #e0d5c0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       color: #555;
       flex-wrap: wrap;
-      gap: 4px;
+      gap: 3px;
     }
     .cert-footer .cert-director {
       font-weight: bold;
@@ -201,31 +206,31 @@
       font-weight: normal;
       color: #777;
       display: block;
-      font-size: 0.55rem;
+      font-size: 0.5rem;
     }
     .cert-footer .cert-seal {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       color: #b8860b;
       opacity: 0.7;
     }
     .cert-footer .cert-date {
-      font-size: 0.6rem;
+      font-size: 0.55rem;
       color: #888;
     }
 
     /* Stamp / Seal overlay */
     .cert-stamp {
       position: absolute;
-      bottom: 24px;
-      right: 18px;
-      width: 60px;
-      height: 60px;
+      bottom: 18px;
+      right: 14px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       border: 3px solid rgba(184, 134, 11, 0.25);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.45rem;
+      font-size: 0.4rem;
       color: rgba(184, 134, 11, 0.35);
       font-weight: bold;
       text-transform: uppercase;
@@ -233,15 +238,15 @@
       pointer-events: none;
       background: rgba(184, 134, 11, 0.05);
       font-family: 'Georgia', serif;
-      padding: 6px;
+      padding: 4px;
       text-align: center;
       line-height: 1.2;
     }
 
-    /* Download/Share/Print Buttons */
+    /* Buttons */
     .cert-actions {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
       flex-wrap: wrap;
       margin-top: 16px;
@@ -257,12 +262,12 @@
     }
 
     /* ==========================================================
-       RESPONSIVE: SQUARE ON ALL SCREENS
+       RESPONSIVE – SQUARE ON ALL SCREENS
        ========================================================== */
     @media (max-width: 550px) {
       .certificate-box {
         max-width: 100%;
-        padding: 14px 12px 12px;
+        padding: 12px 10px 10px;
         border-width: 4px;
         aspect-ratio: 1 / 1;
       }
@@ -274,76 +279,76 @@
         border-width: 1px;
       }
       .cert-institute {
-        font-size: 1rem;
+        font-size: 0.9rem;
       }
       .cert-main-title {
-        font-size: 1.1rem;
+        font-size: 1rem;
         letter-spacing: 2px;
-        padding: 2px 8px;
+        padding: 1px 8px;
       }
       .cert-student-name {
-        font-size: 1.2rem;
-        padding: 0 8px 2px;
+        font-size: 1.1rem;
+        padding: 0 8px 1px;
       }
       .cert-completion-text {
-        font-size: 0.7rem;
+        font-size: 0.6rem;
       }
       .cert-completion-text strong {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
       }
       .cert-details-row {
-        font-size: 0.65rem;
+        font-size: 0.55rem;
         gap: 4px;
       }
       .cert-details-row span {
         padding: 1px 6px;
       }
       .cert-grade-badge {
-        font-size: 1rem;
-        padding: 2px 12px;
+        font-size: 0.9rem;
+        padding: 2px 10px;
       }
       .cert-footer {
-        font-size: 0.6rem;
+        font-size: 0.5rem;
         flex-direction: column;
         align-items: center;
         text-align: center;
       }
       .cert-footer .cert-director small {
-        font-size: 0.5rem;
+        font-size: 0.45rem;
       }
       .cert-footer .cert-seal {
-        font-size: 1.2rem;
+        font-size: 1rem;
       }
       .cert-footer .cert-date {
-        font-size: 0.55rem;
+        font-size: 0.5rem;
       }
       .cert-stamp {
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
         font-size: 0.35rem;
-        bottom: 14px;
+        bottom: 12px;
         right: 10px;
         border-width: 2px;
-        padding: 4px;
+        padding: 3px;
       }
       .cert-top-decoration .cert-logo {
         font-size: 1rem;
       }
       .cert-top-decoration .cert-serial {
-        font-size: 0.45rem;
+        font-size: 0.4rem;
       }
     }
 
     @media (max-width: 400px) {
       .cert-main-title {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         letter-spacing: 1px;
       }
       .cert-student-name {
-        font-size: 1rem;
+        font-size: 0.9rem;
       }
       .cert-details-row span {
-        font-size: 0.55rem;
+        font-size: 0.5rem;
       }
     }
   </style>
@@ -386,9 +391,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // ==========================================================
-    // LOAD RESULT FROM LOCALSTORAGE
-    // ==========================================================
     function loadResult() {
       const container = document.getElementById('resultContent');
       const resultJSON = localStorage.getItem('cpes_result');
@@ -408,7 +410,6 @@
         const { studentName, total, correct, wrong, score, grade, detailed, quizId, timestamp } = result;
         const percentage = Math.round((correct / total) * 100);
 
-        // Fetch quiz title
         let quizTitle = 'Chemistry Quiz';
         db.collection('quizzes').doc(quizId).get().then(doc => {
           if (doc.exists) quizTitle = doc.data().title || 'Chemistry Quiz';
@@ -416,7 +417,6 @@
         }).catch(() => renderResult(quizTitle));
 
         function renderResult(title) {
-          // Build question review
           let reviewHtml = '';
           if (detailed && detailed.length) {
             reviewHtml = '<div class="question-review"><h4>📝 Question Review</h4>';
@@ -454,77 +454,38 @@
             </p>
             ${reviewHtml}
 
-            <!-- ============================================= -->
-            <!-- SQUARE CERTIFICATE (1:1) -->
-            <!-- ============================================= -->
+            <!-- SQUARE CERTIFICATE -->
             <div class="certificate-wrapper" id="certificateWrapper">
               <div class="certificate-box" id="certificateBox">
-
-                <!-- Top decoration -->
                 <div class="cert-top-decoration">
                   <span class="cert-logo">⚗️</span>
                   <span class="cert-serial">#CPES-${String(Date.now()).slice(-6)}</span>
                 </div>
-
-                <!-- Institute Name -->
-                <div class="cert-institute">
-                  Chemistry Point <span>⚡</span>
-                </div>
+                <div class="cert-institute">Chemistry Point <span>⚡</span></div>
                 <div class="cert-subtitle">by Pradeep Sir</div>
-
-                <!-- Main Title -->
                 <div class="cert-main-title">Certificate of Completion</div>
-
-                <!-- Student Name -->
                 <div class="cert-student-name">${studentName || 'Student'}</div>
-
-                <!-- Completion Text -->
-                <div class="cert-completion-text">
-                  has successfully completed the <strong>${title}</strong>
-                </div>
-
-                <!-- Details Row -->
+                <div class="cert-completion-text">has successfully completed the <strong>${title}</strong></div>
                 <div class="cert-details-row">
                   <span>📊 Score: <strong>${percentage}%</strong></span>
                   <span>✅ Correct: <strong>${correct}</strong></span>
                   <span>📅 Date: <strong>${dateStr}</strong></span>
                 </div>
-
-                <!-- Grade Badge -->
                 <div class="cert-grade-badge">Grade: ${grade || 'N/A'}</div>
-
-                <!-- Footer -->
                 <div class="cert-footer">
-                  <div class="cert-director">
-                    👨‍🏫 Pradeep Sir
-                    <small>Director, Chemistry Point</small>
-                  </div>
+                  <div class="cert-director">👨‍🏫 Pradeep Sir <small>Director, Chemistry Point</small></div>
                   <div class="cert-seal">🏅</div>
                   <div class="cert-date">Issued: ${dateStr}</div>
                 </div>
-
-                <!-- Stamp -->
                 <div class="cert-stamp">Chemistry Point<br>Pradeep Sir</div>
-
               </div>
             </div>
 
-            <!-- ============================================= -->
-            <!-- SHARE / PRINT / DOWNLOAD BUTTONS -->
-            <!-- ============================================= -->
             <div class="cert-actions">
-              <button class="btn btn--primary" onclick="downloadPNG()">
-                <span class="material-symbols-rounded">image</span> PNG
-              </button>
-              <button class="btn btn--primary" onclick="downloadPDF()">
-                <span class="material-symbols-rounded">picture_as_pdf</span> PDF
-              </button>
-              <button class="btn btn--primary" onclick="shareCertificate()">
-                <span class="material-symbols-rounded">share</span> Share
-              </button>
-              <button class="btn btn--outline" onclick="window.print()">
-                <span class="material-symbols-rounded">print</span> Print
-              </button>
+              <button class="btn btn--primary" onclick="downloadPNG()"><span class="material-symbols-rounded">image</span> PNG</button>
+              <button class="btn btn--primary" onclick="downloadPDF()"><span class="material-symbols-rounded">picture_as_pdf</span> PDF</button>
+              <button class="btn btn--primary" onclick="shareCertificate()"><span class="material-symbols-rounded">share</span> Share</button>
+              <button class="btn btn--outline" onclick="window.print()"><span class="material-symbols-rounded">print</span> Print</button>
             </div>
           `;
         }
@@ -534,12 +495,12 @@
     }
 
     // ==========================================================
-    // DOWNLOAD FUNCTIONS (FIXED FOR SQUARE CAPTURE)
+    // DOWNLOAD FUNCTIONS – SQUARE CAPTURE
     // ==========================================================
     function downloadPNG() {
       const el = document.getElementById('certificateBox');
       html2canvas(el, {
-        scale: 2.5,
+        scale: 3,
         backgroundColor: '#ffffff',
         useCORS: true,
         logging: false,
@@ -548,9 +509,16 @@
         windowWidth: el.scrollWidth,
         windowHeight: el.scrollHeight
       }).then(canvas => {
+        // Ensure square crop
+        const size = Math.min(canvas.width, canvas.height);
+        const squareCanvas = document.createElement('canvas');
+        squareCanvas.width = size;
+        squareCanvas.height = size;
+        const ctx = squareCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, 0, size, size, 0, 0, size, size);
         const link = document.createElement('a');
         link.download = `Certificate_${Date.now()}.png`;
-        link.href = canvas.toDataURL('image/png');
+        link.href = squareCanvas.toDataURL('image/png');
         link.click();
       }).catch(err => alert('PNG error: ' + err.message));
     }
@@ -558,7 +526,7 @@
     function downloadPDF() {
       const el = document.getElementById('certificateBox');
       html2canvas(el, {
-        scale: 2.5,
+        scale: 3,
         backgroundColor: '#ffffff',
         useCORS: true,
         logging: false,
@@ -567,11 +535,16 @@
         windowWidth: el.scrollWidth,
         windowHeight: el.scrollHeight
       }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
+        const size = Math.min(canvas.width, canvas.height);
+        const squareCanvas = document.createElement('canvas');
+        squareCanvas.width = size;
+        squareCanvas.height = size;
+        const ctx = squareCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, 0, size, size, 0, 0, size, size);
+        const imgData = squareCanvas.toDataURL('image/png');
         const { jsPDF } = window.jspdf;
-        // Square PDF page (equal width and height)
-        const pdf = new jsPDF('p', 'mm', [210, 210]); // Square page
-        const imgSize = 190; // fit inside with margin
+        const pdf = new jsPDF('p', 'mm', [210, 210]);
+        const imgSize = 190;
         const x = (210 - imgSize) / 2;
         const y = (210 - imgSize) / 2;
         pdf.addImage(imgData, 'PNG', x, y, imgSize, imgSize);
@@ -580,12 +553,12 @@
     }
 
     // ==========================================================
-    // SHARE CERTIFICATE (Web Share API)
+    // SHARE
     // ==========================================================
     function shareCertificate() {
       const el = document.getElementById('certificateBox');
       html2canvas(el, {
-        scale: 2.5,
+        scale: 3,
         backgroundColor: '#ffffff',
         useCORS: true,
         logging: false,
@@ -594,7 +567,13 @@
         windowWidth: el.scrollWidth,
         windowHeight: el.scrollHeight
       }).then(canvas => {
-        canvas.toBlob(function(blob) {
+        const size = Math.min(canvas.width, canvas.height);
+        const squareCanvas = document.createElement('canvas');
+        squareCanvas.width = size;
+        squareCanvas.height = size;
+        const ctx = squareCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, 0, size, size, 0, 0, size, size);
+        squareCanvas.toBlob(function(blob) {
           const file = new File([blob], 'Certificate.png', { type: 'image/png' });
           if (navigator.share) {
             navigator.share({
@@ -609,9 +588,6 @@
       }).catch(err => alert('Share error: ' + err.message));
     }
 
-    // ==========================================================
-    // INIT
-    // ==========================================================
     loadResult();
   </script>
 </body>

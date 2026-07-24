@@ -120,7 +120,7 @@
         timeLimit = quiz.duration || 30;
         timeRemaining = timeLimit * 60;
 
-        // 🔥 Get selected question IDs from quiz
+        // Get selected question IDs from quiz
         const questionIds = quiz.questionIds || [];
         if (questionIds.length === 0) {
           document.getElementById('questionsContainer').innerHTML = 
@@ -153,7 +153,7 @@
         loadedQuestions.sort((a, b) => parseInt(a.id) - parseInt(b.id));
         questions = loadedQuestions;
 
-        // 🔥 Load ANSWER KEY for these question IDs
+        // Load ANSWER KEY for these question IDs
         const akPromises = questionIds.map(id => db.collection('answerKey').doc(id).get());
         const akSnaps = await Promise.all(akPromises);
         akSnaps.forEach(doc => {
@@ -174,7 +174,7 @@
     }
 
     // ==========================================================
-    // RENDER QUESTIONS (same as before)
+    // RENDER QUESTIONS
     // ==========================================================
     function renderQuestions() {
       const container = document.getElementById('questionsContainer');
@@ -213,7 +213,7 @@
       updateUI();
     }
 
-    // Navigation (unchanged)
+    // Navigation
     function updateUI() {
       const total = questions.length;
       if (total === 0) return;
@@ -243,7 +243,7 @@
       }
     });
 
-    // Progress (unchanged)
+    // Progress
     function saveProgress() {
       const answers = {};
       document.querySelectorAll('.quiz-question').forEach(qDiv => {
@@ -272,7 +272,7 @@
       } catch (e) {}
     }
 
-    // Timer (unchanged)
+    // Timer
     function startTimer() {
       updateTimerDisplay();
       timerInterval = setInterval(() => {
@@ -299,7 +299,9 @@
       }
     }
 
-    // Submit (unchanged, uses answerKey)
+    // ==========================================================
+    // 🔥 SUBMIT QUIZ – WITH AUTO-DETECT 0-BASED / 1-BASED
+    // ==========================================================
     document.getElementById('submitBtn').addEventListener('click', () => {
       if (confirm('Are you sure you want to submit? You cannot change answers after submission.')) {
         submitQuiz();
@@ -330,8 +332,14 @@
       const detailed = [];
 
       questionIds.forEach(qId => {
-        const userAns = answers[qId];
-        const correctAns = answerKey[qId];
+        const userAns = answers[qId];          // 0-based (0,1,2,3)
+        let correctAns = answerKey[qId];      // could be 0-based or 1-based
+
+        // 🧠 Auto-detect: if correctAns is between 1 and 4, treat it as 1-based and convert to 0-based
+        if (correctAns >= 1 && correctAns <= 4) {
+          correctAns = correctAns - 1;        // convert to 0-based
+        }
+
         const isCorrect = (userAns === correctAns);
         if (isCorrect) correct++;
         detailed.push({
@@ -373,7 +381,7 @@
       }, 1200);
     }
 
-    // Keyboard shortcuts (unchanged)
+    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' && !document.getElementById('nextBtn').disabled) {
         document.getElementById('nextBtn').click();

@@ -45,10 +45,51 @@ Displays quizzes, notices, and links to payment.
       pointer-events: none;
     }
 
-    /* 🔥 Fix: Preserve line breaks in descriptions */
+    /* Fix: Preserve line breaks in descriptions */
     .quiz-card__desc,
     .notice-card__desc {
       white-space: pre-wrap;
+    }
+
+    /* Payment Confirmation Modal */
+    .payment-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    .payment-modal-overlay.open {
+      display: flex;
+    }
+    .payment-modal-box {
+      background: var(--color-surface);
+      border-radius: var(--radius-md);
+      padding: 32px 28px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .payment-modal-box h3 {
+      margin-bottom: 8px;
+    }
+    .payment-modal-box p {
+      margin-bottom: 20px;
+      color: var(--color-text-secondary);
+    }
+    .payment-modal-box .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .payment-modal-box .btn-group .btn {
+      min-width: 100px;
     }
   </style>
 </head>
@@ -72,9 +113,7 @@ Displays quizzes, notices, and links to payment.
           <li><a href="#notices" class="navbar__link">Notices</a></li>
         </ul>
         <div class="navbar__actions">
-        <!--  <a href="admin/login.html" class="btn btn--outline btn--sm">
-            <span class="material-symbols-rounded">admin_panel_settings</span> Admin
-          </a>-->
+          <!-- Admin link hidden -->
         </div>
       </nav>
     </div>
@@ -185,6 +224,18 @@ Displays quizzes, notices, and links to payment.
     </div>
   </footer>
 
+  <!-- ==================== PAYMENT CONFIRMATION MODAL ==================== -->
+  <div class="payment-modal-overlay" id="paymentModal">
+    <div class="payment-modal-box">
+      <h3>🧾 भुगतान की पुष्टि</h3>
+      <p>क्या आपने पहले ही इस क्विज़ के लिए <strong>भुगतान</strong> कर दिया है?</p>
+      <div class="btn-group">
+        <button class="btn btn--primary" id="paymentYesBtn">✅ हाँ</button>
+        <button class="btn btn--outline" id="paymentNoBtn">❌ नहीं</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ========================================================== -->
   <!-- SCRIPTS -->
   <!-- ========================================================== -->
@@ -203,6 +254,49 @@ Displays quizzes, notices, and links to payment.
     const db = firebase.firestore();
 
     // ==========================================================
+    // PAYMENT MODAL LOGIC
+    // ==========================================================
+    let pendingQuizId = null;
+
+    function showPaymentModal(quizId) {
+      pendingQuizId = quizId;
+      
+      // Check if already confirmed for this quiz in localStorage
+      const confirmed = localStorage.getItem(`cpes_payment_confirmed_${quizId}`);
+      if (confirmed === 'true') {
+        // Already confirmed, go directly to verify page
+        window.location.href = `student/verify.html?quiz=${quizId}`;
+        return;
+      }
+      
+      document.getElementById('paymentModal').classList.add('open');
+    }
+
+    document.getElementById('paymentYesBtn').addEventListener('click', function() {
+      if (pendingQuizId) {
+        // Save confirmation in localStorage so next time skip modal
+        localStorage.setItem(`cpes_payment_confirmed_${pendingQuizId}`, 'true');
+        window.location.href = `student/verify.html?quiz=${pendingQuizId}`;
+      }
+    });
+
+    document.getElementById('paymentNoBtn').addEventListener('click', function() {
+      if (pendingQuizId) {
+        // Remove any previous confirmation for this quiz
+        localStorage.removeItem(`cpes_payment_confirmed_${pendingQuizId}`);
+        window.location.href = `student/payment.html?quiz=${pendingQuizId}`;
+      }
+    });
+
+    // Close modal if user clicks outside (optional)
+    document.getElementById('paymentModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.remove('open');
+        pendingQuizId = null;
+      }
+    });
+
+    // ==========================================================
     // LOAD QUIZZES (UPDATED)
     // ==========================================================
     async function loadQuizzes() {
@@ -219,10 +313,7 @@ Displays quizzes, notices, and links to payment.
           const featured = q.featured ? 'quiz-card--featured' : '';
           const badge = q.featured ? `<div class="quiz-card__badge">Popular</div>` : '';
           
-          // 🔥 Format description: replace \n with <br>
           const descHtml = (q.description || '').replace(/\n/g, '<br>');
-          
-          // 🔥 Get question count from questionIds array (if exists) else fallback to questionsCount field
           const questionCount = (q.questionIds && Array.isArray(q.questionIds)) ? q.questionIds.length : (q.questionsCount || 0);
           
           html += `
@@ -238,9 +329,9 @@ Displays quizzes, notices, and links to payment.
                 <span><span class="material-symbols-rounded">quiz</span> ${questionCount} Qs</span>
               </div>
               <div class="quiz-card__price">₹${q.price || 0}</div>
-              <a href="student/payment.html?quiz=${doc.id}" class="btn btn--primary btn--block">
+              <button class="btn btn--primary btn--block" onclick="showPaymentModal('${doc.id}')">
                 <span class="material-symbols-rounded">shopping_cart</span> Purchase
-              </a>
+              </button>
             </article>
           `;
         });
@@ -251,7 +342,7 @@ Displays quizzes, notices, and links to payment.
     }
 
     // ==========================================================
-    // LOAD NOTICES (UPDATED)
+    // LOAD NOTICES
     // ==========================================================
     async function loadNotices() {
       const container = document.getElementById('noticesContainer');
@@ -264,7 +355,6 @@ Displays quizzes, notices, and links to payment.
         let html = '';
         snap.forEach(doc => {
           const n = doc.data();
-          // 🔥 Format description: replace \n with <br>
           const descHtml = (n.description || '').replace(/\n/g, '<br>');
           html += `
             <article class="notice-card">
@@ -289,7 +379,7 @@ Displays quizzes, notices, and links to payment.
     }
 
     // ==========================================================
-    // LOAD STATS (for hero)
+    // LOAD STATS
     // ==========================================================
     async function loadStats() {
       try {

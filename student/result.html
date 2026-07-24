@@ -27,7 +27,7 @@
     .q-item .status.wrong { color:var(--color-danger); }
 
     /* ==========================================================
-       MOBILE FRIENDLY CERTIFICATE DESIGN
+       SQUARE CERTIFICATE (1:1 ASPECT RATIO)
        ========================================================== */
     .certificate-wrapper {
       margin-top: 24px;
@@ -41,9 +41,10 @@
 
     .certificate-box {
       width: 100%;
-      max-width: 700px;
+      max-width: 500px; /* Square size */
+      aspect-ratio: 1 / 1; /* Square */
       background: #fff;
-      padding: 28px 24px 20px;
+      padding: 20px 18px 16px;
       border-radius: 12px;
       border: 6px double #b8860b;
       position: relative;
@@ -51,6 +52,9 @@
       text-align: center;
       font-family: 'Georgia', 'Times New Roman', serif;
       box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     /* Decorative border inner */
@@ -71,91 +75,91 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       border-bottom: 2px solid #b8860b;
       padding-bottom: 4px;
       flex-wrap: wrap;
     }
     .cert-top-decoration .cert-logo {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       color: #b8860b;
     }
     .cert-top-decoration .cert-serial {
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       color: #999;
       font-family: 'Courier New', monospace;
     }
 
     /* Institute Name */
     .cert-institute {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       font-weight: bold;
       color: #1a1a2e;
       letter-spacing: 1px;
-      margin-bottom: 2px;
+      margin-bottom: 0px;
     }
     .cert-institute span {
       color: #b8860b;
     }
 
     .cert-subtitle {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #666;
-      letter-spacing: 3px;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     /* Main title */
     .cert-main-title {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       font-weight: bold;
       color: #1a1a2e;
-      letter-spacing: 4px;
+      letter-spacing: 3px;
       text-transform: uppercase;
       border-top: 2px solid #b8860b;
       border-bottom: 2px solid #b8860b;
       display: inline-block;
-      padding: 2px 16px;
-      margin-bottom: 8px;
+      padding: 2px 12px;
+      margin-bottom: 4px;
       background: linear-gradient(135deg, #fdf6e3, #f5e6c8);
     }
 
     /* Student name */
     .cert-student-name {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: bold;
       color: #1a1a2e;
-      margin: 4px 0 2px;
+      margin: 2px 0 0px;
       border-bottom: 2px dashed #d4a843;
       display: inline-block;
-      padding: 0 16px 4px;
+      padding: 0 12px 2px;
     }
 
     /* Completion text */
     .cert-completion-text {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       color: #333;
-      margin: 4px 0;
+      margin: 2px 0;
     }
     .cert-completion-text strong {
       color: #1a1a2e;
-      font-size: 1rem;
+      font-size: 0.9rem;
     }
 
     /* Details row */
     .cert-details-row {
       display: flex;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
       flex-wrap: wrap;
-      margin: 6px 0 10px;
-      font-size: 0.85rem;
+      margin: 4px 0 6px;
+      font-size: 0.75rem;
       color: #444;
     }
     .cert-details-row span {
       background: #f8f4ec;
-      padding: 2px 12px;
+      padding: 1px 10px;
       border-radius: 20px;
       border: 1px solid #e0d5c0;
     }
@@ -168,26 +172,26 @@
       display: inline-block;
       background: linear-gradient(135deg, #b8860b, #d4a843);
       color: #fff;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       font-weight: bold;
-      padding: 2px 18px;
+      padding: 2px 16px;
       border-radius: 8px;
-      margin: 4px 0 8px;
+      margin: 2px 0 4px;
       letter-spacing: 1px;
     }
 
     /* Footer */
     .cert-footer {
-      margin-top: 10px;
-      padding-top: 10px;
+      margin-top: 4px;
+      padding-top: 6px;
       border-top: 2px solid #e0d5c0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       color: #555;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 4px;
     }
     .cert-footer .cert-director {
       font-weight: bold;
@@ -197,31 +201,31 @@
       font-weight: normal;
       color: #777;
       display: block;
-      font-size: 0.65rem;
+      font-size: 0.55rem;
     }
     .cert-footer .cert-seal {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       color: #b8860b;
       opacity: 0.7;
     }
     .cert-footer .cert-date {
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       color: #888;
     }
 
     /* Stamp / Seal overlay */
     .cert-stamp {
       position: absolute;
-      bottom: 30px;
-      right: 24px;
-      width: 70px;
-      height: 70px;
+      bottom: 24px;
+      right: 18px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       border: 3px solid rgba(184, 134, 11, 0.25);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.5rem;
+      font-size: 0.45rem;
       color: rgba(184, 134, 11, 0.35);
       font-weight: bold;
       text-transform: uppercase;
@@ -229,12 +233,12 @@
       pointer-events: none;
       background: rgba(184, 134, 11, 0.05);
       font-family: 'Georgia', serif;
-      padding: 8px;
+      padding: 6px;
       text-align: center;
       line-height: 1.2;
     }
 
-    /* Download buttons */
+    /* Download/Share/Print Buttons */
     .cert-actions {
       display: flex;
       gap: 12px;
@@ -253,13 +257,14 @@
     }
 
     /* ==========================================================
-       RESPONSIVE FIXES
+       RESPONSIVE: SQUARE ON ALL SCREENS
        ========================================================== */
-    @media (max-width: 600px) {
+    @media (max-width: 550px) {
       .certificate-box {
-        padding: 16px 12px 14px;
-        border-width: 4px;
         max-width: 100%;
+        padding: 14px 12px 12px;
+        border-width: 4px;
+        aspect-ratio: 1 / 1;
       }
       .certificate-box::before {
         top: 4px;
@@ -269,76 +274,76 @@
         border-width: 1px;
       }
       .cert-institute {
-        font-size: 1.1rem;
+        font-size: 1rem;
       }
       .cert-main-title {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         letter-spacing: 2px;
-        padding: 2px 10px;
+        padding: 2px 8px;
       }
       .cert-student-name {
-        font-size: 1.3rem;
-        padding: 0 10px 2px;
+        font-size: 1.2rem;
+        padding: 0 8px 2px;
       }
       .cert-completion-text {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
       }
       .cert-completion-text strong {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
       }
       .cert-details-row {
-        font-size: 0.7rem;
-        gap: 6px;
+        font-size: 0.65rem;
+        gap: 4px;
       }
       .cert-details-row span {
-        padding: 1px 8px;
+        padding: 1px 6px;
       }
       .cert-grade-badge {
         font-size: 1rem;
         padding: 2px 12px;
       }
       .cert-footer {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         flex-direction: column;
         align-items: center;
         text-align: center;
       }
       .cert-footer .cert-director small {
-        font-size: 0.55rem;
+        font-size: 0.5rem;
       }
       .cert-footer .cert-seal {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
       }
       .cert-footer .cert-date {
-        font-size: 0.6rem;
+        font-size: 0.55rem;
       }
       .cert-stamp {
-        width: 50px;
-        height: 50px;
-        font-size: 0.4rem;
-        bottom: 16px;
-        right: 12px;
+        width: 45px;
+        height: 45px;
+        font-size: 0.35rem;
+        bottom: 14px;
+        right: 10px;
         border-width: 2px;
         padding: 4px;
       }
       .cert-top-decoration .cert-logo {
-        font-size: 1.2rem;
+        font-size: 1rem;
       }
       .cert-top-decoration .cert-serial {
-        font-size: 0.5rem;
+        font-size: 0.45rem;
       }
     }
 
     @media (max-width: 400px) {
       .cert-main-title {
-        font-size: 1rem;
+        font-size: 0.9rem;
         letter-spacing: 1px;
       }
       .cert-student-name {
         font-size: 1rem;
       }
       .cert-details-row span {
-        font-size: 0.6rem;
+        font-size: 0.55rem;
       }
     }
   </style>
@@ -450,7 +455,7 @@
             ${reviewHtml}
 
             <!-- ============================================= -->
-            <!-- NEW CERTIFICATE DESIGN (MOBILE FRIENDLY) -->
+            <!-- SQUARE CERTIFICATE (1:1) -->
             <!-- ============================================= -->
             <div class="certificate-wrapper" id="certificateWrapper">
               <div class="certificate-box" id="certificateBox">
@@ -504,12 +509,21 @@
               </div>
             </div>
 
+            <!-- ============================================= -->
+            <!-- SHARE / PRINT / DOWNLOAD BUTTONS -->
+            <!-- ============================================= -->
             <div class="cert-actions">
               <button class="btn btn--primary" onclick="downloadPNG()">
-                <span class="material-symbols-rounded">image</span> Download PNG
+                <span class="material-symbols-rounded">image</span> PNG
               </button>
               <button class="btn btn--primary" onclick="downloadPDF()">
-                <span class="material-symbols-rounded">picture_as_pdf</span> Download PDF
+                <span class="material-symbols-rounded">picture_as_pdf</span> PDF
+              </button>
+              <button class="btn btn--primary" onclick="shareCertificate()">
+                <span class="material-symbols-rounded">share</span> Share
+              </button>
+              <button class="btn btn--outline" onclick="window.print()">
+                <span class="material-symbols-rounded">print</span> Print
               </button>
             </div>
           `;
@@ -520,7 +534,7 @@
     }
 
     // ==========================================================
-    // DOWNLOAD FUNCTIONS (FIXED FOR MOBILE CAPTURE)
+    // DOWNLOAD FUNCTIONS (FIXED FOR SQUARE CAPTURE)
     // ==========================================================
     function downloadPNG() {
       const el = document.getElementById('certificateBox');
@@ -555,14 +569,44 @@
       }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('l', 'mm', 'a4');
-        const imgWidth = 280;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        const x = (297 - imgWidth) / 2;
-        const y = (210 - imgHeight) / 2;
-        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+        // Square PDF page (equal width and height)
+        const pdf = new jsPDF('p', 'mm', [210, 210]); // Square page
+        const imgSize = 190; // fit inside with margin
+        const x = (210 - imgSize) / 2;
+        const y = (210 - imgSize) / 2;
+        pdf.addImage(imgData, 'PNG', x, y, imgSize, imgSize);
         pdf.save(`Certificate_${Date.now()}.pdf`);
       }).catch(err => alert('PDF error: ' + err.message));
+    }
+
+    // ==========================================================
+    // SHARE CERTIFICATE (Web Share API)
+    // ==========================================================
+    function shareCertificate() {
+      const el = document.getElementById('certificateBox');
+      html2canvas(el, {
+        scale: 2.5,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+        width: el.scrollWidth,
+        height: el.scrollHeight,
+        windowWidth: el.scrollWidth,
+        windowHeight: el.scrollHeight
+      }).then(canvas => {
+        canvas.toBlob(function(blob) {
+          const file = new File([blob], 'Certificate.png', { type: 'image/png' });
+          if (navigator.share) {
+            navigator.share({
+              title: 'My Certificate',
+              text: 'Check out my certificate from Chemistry Point!',
+              files: [file]
+            }).catch(() => {});
+          } else {
+            alert('Share not supported on this browser. Please use the download option.');
+          }
+        });
+      }).catch(err => alert('Share error: ' + err.message));
     }
 
     // ==========================================================

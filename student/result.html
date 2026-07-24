@@ -27,7 +27,7 @@
     .q-item .status.wrong { color:red; }
 
     /* ==========================================================
-       CERTIFICATE – SIMILAR TO SCREENSHOT (FIXED SIZE)
+       CERTIFICATE – SAME AS BEFORE (NO CHANGES)
        ========================================================== */
     .certificate-wrapper {
       margin-top: 24px;
@@ -53,9 +53,10 @@
       flex-direction: column;
       justify-content: space-between;
       position: relative;
+      max-width: 100%;
+      aspect-ratio: 800 / 500;
     }
 
-    /* Decorative inner border */
     .certificate-box::before {
       content: '';
       position: absolute;
@@ -186,7 +187,6 @@
     }
     .cert-footer .date strong { color: #1a1a2e; }
 
-    /* Stamp */
     .cert-stamp {
       position: absolute;
       bottom: 20px;
@@ -220,7 +220,7 @@
 
     .no-result { text-align:center; padding:40px 20px; }
 
-    /* Responsive scaling */
+    /* Responsive scaling – NO CHANGE */
     @media (max-width: 850px) {
       .certificate-box {
         width: 100%;
@@ -251,6 +251,7 @@
   </style>
 </head>
 <body>
+  <!-- NAVBAR -->
   <header class="navbar">
     <div class="navbar__container container">
       <a href="../index.html" class="navbar__brand">
@@ -315,7 +316,6 @@
 
           const dateStr = new Date(timestamp || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
-          // Grade text mapping
           let gradeText = grade || 'N/A';
           if (grade === 'A+') gradeText = 'Excellent';
           else if (grade === 'A') gradeText = 'Very Good';
@@ -335,7 +335,7 @@
             <p>${percentage>=70?'🎉 Excellent!':percentage>=40?'👍 Good effort!':'📚 Keep learning!'}</p>
             ${reviewHtml}
 
-            <!-- CERTIFICATE (Screenshot style) -->
+            <!-- CERTIFICATE -->
             <div class="certificate-wrapper">
               <div class="certificate-box" id="certificateBox">
                 <div class="cert-header">
@@ -383,38 +383,82 @@
       }
     }
 
-    // ===== DOWNLOAD FUNCTIONS – CAPTURE FULL 800x500 =====
-    function downloadPNG() {
+    // ==========================================================
+    // 🔥 FIXED DOWNLOAD FUNCTIONS – NO REDESIGN, ONLY RENDERING
+    // ==========================================================
+
+    async function prepareCertificateForCapture() {
       const el = document.getElementById('certificateBox');
-      html2canvas(el, {
-        scale: 2.5,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        logging: false,
-        width: 800,
-        height: 500,
-        windowWidth: 800,
-        windowHeight: 500
-      }).then(canvas => {
+      if (!el) return null;
+      // Store original styles
+      const origWidth = el.style.width;
+      const origHeight = el.style.height;
+      const origMaxWidth = el.style.maxWidth;
+      const origAspect = el.style.aspectRatio;
+      const origPosition = el.style.position;
+      // Force fixed size to 800x500 for capture
+      el.style.width = '800px';
+      el.style.height = '500px';
+      el.style.maxWidth = 'none';
+      el.style.aspectRatio = 'auto';
+      el.style.position = 'relative';
+      // Wait for fonts and layout
+      await document.fonts.ready;
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      return { el, origWidth, origHeight, origMaxWidth, origAspect, origPosition };
+    }
+
+    function restoreCertificate(styles) {
+      if (!styles) return;
+      const { el, origWidth, origHeight, origMaxWidth, origAspect, origPosition } = styles;
+      el.style.width = origWidth || '';
+      el.style.height = origHeight || '';
+      el.style.maxWidth = origMaxWidth || '';
+      el.style.aspectRatio = origAspect || '';
+      el.style.position = origPosition || '';
+    }
+
+    async function downloadPNG() {
+      const styles = await prepareCertificateForCapture();
+      if (!styles) return;
+      try {
+        const el = styles.el;
+        const canvas = await html2canvas(el, {
+          scale: 2.5,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false,
+          width: 800,
+          height: 500,
+          windowWidth: 800,
+          windowHeight: 500
+        });
         const link = document.createElement('a');
         link.download = `Certificate_${Date.now()}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
-      }).catch(err => alert('PNG error: ' + err.message));
+      } catch (err) {
+        alert('PNG error: ' + err.message);
+      } finally {
+        restoreCertificate(styles);
+      }
     }
 
-    function downloadPDF() {
-      const el = document.getElementById('certificateBox');
-      html2canvas(el, {
-        scale: 2.5,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        logging: false,
-        width: 800,
-        height: 500,
-        windowWidth: 800,
-        windowHeight: 500
-      }).then(canvas => {
+    async function downloadPDF() {
+      const styles = await prepareCertificateForCapture();
+      if (!styles) return;
+      try {
+        const el = styles.el;
+        const canvas = await html2canvas(el, {
+          scale: 2.5,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false,
+          width: 800,
+          height: 500,
+          windowWidth: 800,
+          windowHeight: 500
+        });
         const imgData = canvas.toDataURL('image/png');
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('l', 'mm', 'a4');
@@ -424,31 +468,45 @@
         const y = (210 - imgHeight) / 2;
         pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
         pdf.save(`Certificate_${Date.now()}.pdf`);
-      }).catch(err => alert('PDF error: ' + err.message));
+      } catch (err) {
+        alert('PDF error: ' + err.message);
+      } finally {
+        restoreCertificate(styles);
+      }
     }
 
-    function shareCertificate() {
-      const el = document.getElementById('certificateBox');
-      html2canvas(el, {
-        scale: 2.5,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        logging: false,
-        width: 800,
-        height: 500,
-        windowWidth: 800,
-        windowHeight: 500
-      }).then(canvas => {
+    async function shareCertificate() {
+      const styles = await prepareCertificateForCapture();
+      if (!styles) return;
+      try {
+        const el = styles.el;
+        const canvas = await html2canvas(el, {
+          scale: 2.5,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false,
+          width: 800,
+          height: 500,
+          windowWidth: 800,
+          windowHeight: 500
+        });
         canvas.toBlob(function(blob) {
           const file = new File([blob], 'Certificate.png', { type: 'image/png' });
           if (navigator.share) {
-            navigator.share({ title: 'My Certificate', text: 'Certificate from Chemistry Point', files: [file] })
-              .catch(() => {});
+            navigator.share({
+              title: 'My Certificate',
+              text: 'Certificate from Chemistry Point',
+              files: [file]
+            }).catch(() => {});
           } else {
             alert('Share not supported.');
           }
         });
-      }).catch(err => alert('Share error: ' + err.message));
+      } catch (err) {
+        alert('Share error: ' + err.message);
+      } finally {
+        restoreCertificate(styles);
+      }
     }
 
     loadResult();

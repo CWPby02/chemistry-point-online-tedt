@@ -13,119 +13,76 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
   <style>
-    .result-score { font-size:4rem; font-weight:var(--font-weight-bold); color:var(--color-primary); }
-    .result-grade { font-size:2.5rem; font-weight:var(--font-weight-bold); color:var(--color-primary); margin-top:4px; }
+    .result-score { font-size:4rem; font-weight:bold; color:var(--color-primary); }
+    .result-grade { font-size:2.5rem; font-weight:bold; color:var(--color-primary); }
     .result-details { display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin:16px 0; }
     .result-details strong { display:block; font-size:1.6rem; }
-    .result-details .correct strong { color:var(--color-success); }
-    .result-details .wrong strong { color:var(--color-danger); }
-    .question-review { margin:16px 0; text-align:left; background:var(--color-bg); border-radius:var(--radius-md); padding:12px 16px; max-height:300px; overflow-y:auto; }
-    .question-review .q-item { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--color-border); }
+    .result-details .correct strong { color:green; }
+    .result-details .wrong strong { color:red; }
+    .question-review { margin:16px 0; text-align:left; background:#f8f9fe; border-radius:8px; padding:12px 16px; max-height:300px; overflow-y:auto; }
+    .question-review .q-item { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #ddd; }
     .question-review .q-item:last-child { border-bottom:none; }
-    .q-item .status { font-weight:var(--font-weight-bold); }
-    .q-item .status.correct { color:var(--color-success); }
-    .q-item .status.wrong { color:var(--color-danger); }
+    .q-item .status { font-weight:bold; }
+    .q-item .status.correct { color:green; }
+    .q-item .status.wrong { color:red; }
 
-    /* ==========================================================
-       PREMIUM RECTANGLE CERTIFICATE (NO CROP)
-       ========================================================== */
+    /* ===== SIMPLE CERTIFICATE – NO CROP, NORMAL RECTANGLE ===== */
     .certificate-wrapper {
       margin-top: 24px;
-      padding: 16px;
-      background: linear-gradient(145deg, #e8e0d0, #d5cbb8);
-      border-radius: var(--radius-md);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      padding: 20px;
+      background: #f5f0e1;
+      border-radius: 12px;
       display: flex;
       justify-content: center;
     }
 
     .certificate-box {
       width: 100%;
-      max-width: 700px;
+      max-width: 720px;
       background: #ffffff;
-      padding: 28px 32px 24px;
+      padding: 32px 28px 24px;
       border-radius: 12px;
-      border: 8px double #c9a84c;
-      position: relative;
-      box-shadow: 0 0 0 3px #c9a84c inset, 0 0 0 6px #f3edd8 inset;
+      border: 4px solid #c9a84c;
       text-align: center;
-      font-family: 'Georgia', 'Times New Roman', serif;
+      font-family: 'Georgia', serif;
       box-sizing: border-box;
-    }
-
-    /* Decorative inner border */
-    .certificate-box::before {
-      content: '';
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      border: 2px solid #dbb86c;
-      border-radius: 8px;
-      pointer-events: none;
-    }
-
-    .cert-top-decoration {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-      border-bottom: 3px solid #c9a84c;
-      padding-bottom: 6px;
-    }
-    .cert-top-decoration .cert-logo {
-      font-size: 2rem;
-      color: #c9a84c;
-    }
-    .cert-top-decoration .cert-serial {
-      font-size: 0.75rem;
-      color: #999;
-      font-family: 'Courier New', monospace;
-      background: #f5f0e6;
-      padding: 2px 12px;
-      border-radius: 20px;
+      position: relative;
     }
 
     .cert-institute {
       font-size: 1.8rem;
       font-weight: bold;
       color: #1a1a2e;
-      letter-spacing: 2px;
-      margin-bottom: 2px;
     }
     .cert-institute span { color: #c9a84c; }
 
     .cert-subtitle {
-      font-size: 0.85rem;
-      color: #888;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
+      font-size: 1rem;
+      color: #666;
+      letter-spacing: 2px;
     }
 
     .cert-main-title {
       font-size: 2rem;
       font-weight: bold;
       color: #1a1a2e;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      border-top: 3px solid #c9a84c;
-      border-bottom: 3px solid #c9a84c;
+      border-top: 2px solid #c9a84c;
+      border-bottom: 2px solid #c9a84c;
       display: inline-block;
-      padding: 6px 24px;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, #fdf8ee, #f5eddb);
+      padding: 6px 20px;
+      margin: 8px 0 12px;
+      background: #fdf8ee;
+      letter-spacing: 2px;
     }
 
     .cert-student-name {
       font-size: 2.2rem;
       font-weight: bold;
       color: #1a1a2e;
-      margin: 6px 0 4px;
-      border-bottom: 3px dashed #dbb86c;
+      border-bottom: 2px dashed #c9a84c;
       display: inline-block;
       padding: 0 20px 6px;
+      margin-bottom: 6px;
     }
 
     .cert-completion-text {
@@ -133,96 +90,81 @@
       color: #333;
       margin: 6px 0;
     }
-    .cert-completion-text strong {
-      color: #1a1a2e;
-      font-size: 1.1rem;
-    }
+    .cert-completion-text strong { color: #1a1a2e; }
 
     .cert-details-row {
       display: flex;
       justify-content: center;
-      gap: 20px;
+      gap: 16px;
       flex-wrap: wrap;
-      margin: 10px 0 14px;
+      margin: 10px 0;
       font-size: 0.95rem;
       color: #444;
     }
     .cert-details-row span {
       background: #f5f0e6;
-      padding: 4px 18px;
-      border-radius: 30px;
-      border: 1px solid #e0d5c0;
+      padding: 4px 16px;
+      border-radius: 20px;
+      border: 1px solid #ddd;
     }
     .cert-details-row strong { color: #1a1a2e; }
 
     .cert-grade-badge {
       display: inline-block;
-      background: linear-gradient(135deg, #c9a84c, #b8923a);
+      background: #c9a84c;
       color: #fff;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: bold;
-      padding: 4px 28px;
-      border-radius: 12px;
-      margin: 6px 0 12px;
-      letter-spacing: 2px;
-      box-shadow: 0 4px 10px rgba(201,168,76,0.3);
+      padding: 4px 24px;
+      border-radius: 8px;
+      margin: 8px 0;
     }
 
     .cert-footer {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 3px solid #e0d5c0;
+      border-top: 2px solid #ddd;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 0.9rem;
       color: #555;
       flex-wrap: wrap;
-      gap: 8px;
     }
     .cert-footer .cert-director {
       font-weight: bold;
       color: #1a1a2e;
     }
     .cert-footer .cert-director small {
-      font-weight: normal;
-      color: #888;
       display: block;
       font-size: 0.7rem;
-    }
-    .cert-footer .cert-seal {
-      font-size: 2.5rem;
-      color: #c9a84c;
-      opacity: 0.7;
-    }
-    .cert-footer .cert-date {
-      font-size: 0.85rem;
       color: #888;
+      font-weight: normal;
     }
+    .cert-footer .cert-seal { font-size: 2rem; color: #c9a84c; }
+    .cert-footer .cert-date { font-size: 0.85rem; color: #888; }
 
-    /* Stamp */
     .cert-stamp {
       position: absolute;
-      bottom: 40px;
-      right: 30px;
-      width: 80px;
-      height: 80px;
+      bottom: 30px;
+      right: 24px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
-      border: 4px solid rgba(201,168,76,0.3);
+      border: 3px solid rgba(201,168,76,0.3);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.6rem;
-      color: rgba(201,168,76,0.35);
+      color: rgba(201,168,76,0.4);
       font-weight: bold;
       text-transform: uppercase;
       transform: rotate(-15deg);
-      pointer-events: none;
       background: rgba(201,168,76,0.05);
-      font-family: 'Georgia', serif;
-      padding: 10px;
       text-align: center;
       line-height: 1.2;
+      padding: 6px;
+      pointer-events: none;
     }
 
     .cert-actions {
@@ -233,32 +175,13 @@
       margin-top: 16px;
     }
 
-    .no-result {
-      text-align: center;
-      padding: 40px 20px;
-    }
-    .no-result .material-symbols-rounded {
-      font-size: 4rem;
-      color: var(--color-warning);
-    }
-
-    @media (max-width: 600px) {
-      .certificate-box { padding: 18px 14px 16px; }
-      .cert-institute { font-size: 1.4rem; }
-      .cert-main-title { font-size: 1.4rem; letter-spacing: 3px; padding: 4px 12px; }
-      .cert-student-name { font-size: 1.6rem; }
-      .cert-completion-text { font-size: 0.85rem; }
-      .cert-details-row { font-size: 0.8rem; gap: 10px; }
-      .cert-grade-badge { font-size: 1.4rem; padding: 3px 18px; }
-      .cert-footer { font-size: 0.75rem; flex-direction: column; align-items: center; }
-      .cert-stamp { width: 60px; height: 60px; font-size: 0.5rem; bottom: 24px; right: 16px; }
-      .cert-top-decoration .cert-logo { font-size: 1.5rem; }
-      .cert-top-decoration .cert-serial { font-size: 0.6rem; }
-    }
-    @media (max-width: 400px) {
-      .cert-main-title { font-size: 1.1rem; letter-spacing: 1px; }
-      .cert-student-name { font-size: 1.2rem; }
-      .cert-details-row span { font-size: 0.7rem; padding: 2px 10px; }
+    .no-result { text-align:center; padding:40px 20px; }
+    @media (max-width:600px) {
+      .certificate-box { padding:20px 16px; }
+      .cert-institute { font-size:1.4rem; }
+      .cert-main-title { font-size:1.4rem; }
+      .cert-student-name { font-size:1.6rem; }
+      .cert-stamp { width:50px; height:50px; font-size:0.5rem; bottom:16px; right:12px; }
     }
   </style>
 </head>
@@ -276,13 +199,7 @@
   <main style="padding:30px 0;">
     <div class="container" style="max-width:820px;">
       <div class="glass-card" id="resultContainer">
-        <div id="resultContent">
-          <div class="no-result">
-            <span class="material-symbols-rounded">hourglass_empty</span>
-            <h3>No result found</h3>
-            <p class="text-muted">Please complete a quiz first.</p>
-          </div>
-        </div>
+        <div id="resultContent"><div class="no-result"><span class="material-symbols-rounded">hourglass_empty</span><h3>No result found</h3><p class="text-muted">Please complete a quiz first.</p></div></div>
       </div>
     </div>
   </main>
@@ -326,7 +243,7 @@
             detailed.forEach((item, idx) => {
               const statusClass = item.isCorrect ? 'correct' : 'wrong';
               const statusText = item.isCorrect ? '✅ Correct' : '❌ Wrong';
-              reviewHtml += `<div class="q-item"><span><strong>Q${idx+1}</strong> (Your Answer: ${item.userAnswer !== undefined ? item.userAnswer : 'N/A'})</span><span class="status ${statusClass}">${statusText}</span></div>`;
+              reviewHtml += `<div class="q-item"><span><strong>Q${idx+1}</strong> (Your Answer: ${item.userAnswer ?? 'N/A'})</span><span class="status ${statusClass}">${statusText}</span></div>`;
             });
             reviewHtml += '</div>';
           }
@@ -341,20 +258,12 @@
               <span class="wrong"><strong>${wrong}</strong> Wrong</span>
               <span class="total"><strong>${total}</strong> Total</span>
             </div>
-            <p style="color:var(--color-text-secondary);margin-bottom:12px;">
-              ${percentage >= 70 ? '🎉 Excellent! You\'ve passed with flying colors.' :
-                percentage >= 40 ? '👍 Good effort! Keep practicing.' :
-                '📚 Don\'t give up! Review and try again.'}
-            </p>
+            <p>${percentage>=70?'🎉 Excellent!':percentage>=40?'👍 Good effort!':'📚 Keep learning!'}</p>
             ${reviewHtml}
 
-            <!-- PREMIUM CERTIFICATE -->
-            <div class="certificate-wrapper" id="certificateWrapper">
+            <div class="certificate-wrapper">
               <div class="certificate-box" id="certificateBox">
-                <div class="cert-top-decoration">
-                  <span class="cert-logo">⚗️</span>
-                  <span class="cert-serial">#CPES-${String(Date.now()).slice(-6)}</span>
-                </div>
+                <div style="text-align:right;font-size:0.7rem;color:#999;margin-bottom:4px;">#CPES-${Date.now().toString().slice(-6)}</div>
                 <div class="cert-institute">Chemistry Point <span>⚡</span></div>
                 <div class="cert-subtitle">by Pradeep Sir</div>
                 <div class="cert-main-title">Certificate of Completion</div>
@@ -383,83 +292,56 @@
             </div>
           `;
         }
-      } catch (e) {
-        container.innerHTML = `<p style="color:var(--color-danger);">Error loading result: ${e.message}</p>`;
+      } catch(e) {
+        container.innerHTML = `<p style="color:red;">Error: ${e.message}</p>`;
       }
     }
 
-    // ==========================================================
-    // DOWNLOAD FUNCTIONS – FULL CAPTURE, NO CROP
-    // ==========================================================
+    // ===== DOWNLOAD FUNCTIONS – SIMPLE, NO CROP =====
     function downloadPNG() {
       const el = document.getElementById('certificateBox');
-      html2canvas(el, {
-        scale: 3,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        logging: false,
-        width: el.scrollWidth,
-        height: el.scrollHeight,
-        windowWidth: el.scrollWidth,
-        windowHeight: el.scrollHeight
-      }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `Certificate_${Date.now()}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-      }).catch(err => alert('PNG error: ' + err.message));
+      html2canvas(el, { scale: 2, backgroundColor: '#fff', useCORS: true, logging: false })
+        .then(canvas => {
+          const link = document.createElement('a');
+          link.download = `Certificate_${Date.now()}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        })
+        .catch(err => alert('PNG error: ' + err.message));
     }
 
     function downloadPDF() {
       const el = document.getElementById('certificateBox');
-      html2canvas(el, {
-        scale: 3,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        logging: false,
-        width: el.scrollWidth,
-        height: el.scrollHeight,
-        windowWidth: el.scrollWidth,
-        windowHeight: el.scrollHeight
-      }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('l', 'mm', 'a4');
-        const imgWidth = 280;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        const x = (297 - imgWidth) / 2;
-        const y = (210 - imgHeight) / 2;
-        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-        pdf.save(`Certificate_${Date.now()}.pdf`);
-      }).catch(err => alert('PDF error: ' + err.message));
+      html2canvas(el, { scale: 2, backgroundColor: '#fff', useCORS: true, logging: false })
+        .then(canvas => {
+          const imgData = canvas.toDataURL('image/png');
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF('l', 'mm', 'a4');
+          const imgWidth = 280;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          const x = (297 - imgWidth) / 2;
+          const y = (210 - imgHeight) / 2;
+          pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+          pdf.save(`Certificate_${Date.now()}.pdf`);
+        })
+        .catch(err => alert('PDF error: ' + err.message));
     }
 
-    // Share
     function shareCertificate() {
       const el = document.getElementById('certificateBox');
-      html2canvas(el, {
-        scale: 3,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        logging: false,
-        width: el.scrollWidth,
-        height: el.scrollHeight,
-        windowWidth: el.scrollWidth,
-        windowHeight: el.scrollHeight
-      }).then(canvas => {
-        canvas.toBlob(function(blob) {
-          const file = new File([blob], 'Certificate.png', { type: 'image/png' });
-          if (navigator.share) {
-            navigator.share({
-              title: 'My Certificate',
-              text: 'Check out my certificate from Chemistry Point!',
-              files: [file]
-            }).catch(() => {});
-          } else {
-            alert('Share not supported on this browser.');
-          }
-        });
-      }).catch(err => alert('Share error: ' + err.message));
+      html2canvas(el, { scale: 2, backgroundColor: '#fff', useCORS: true, logging: false })
+        .then(canvas => {
+          canvas.toBlob(function(blob) {
+            const file = new File([blob], 'Certificate.png', { type: 'image/png' });
+            if (navigator.share) {
+              navigator.share({ title: 'My Certificate', text: 'Certificate from Chemistry Point', files: [file] })
+                .catch(() => {});
+            } else {
+              alert('Share not supported.');
+            }
+          });
+        })
+        .catch(err => alert('Share error: ' + err.message));
     }
 
     loadResult();

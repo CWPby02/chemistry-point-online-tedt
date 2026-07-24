@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
   <style>
-    /* Same styles as before (keep unchanged) */
+    /* (styles unchanged – same as before) */
     .dashboard-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; border-bottom:2px solid var(--color-border); padding-bottom:12px; overflow-x:auto; }
     .dashboard-tabs button { padding:8px 20px; border:none; border-radius:var(--radius-full); background:transparent; font-weight:var(--font-weight-medium); cursor:pointer; transition:all 0.2s; color:var(--color-text-secondary); white-space:nowrap; }
     .dashboard-tabs button.active { background:var(--color-primary); color:#fff; }
@@ -46,19 +45,21 @@
     .settings-group { background:var(--color-bg); border-radius:var(--radius-md); padding:16px 20px; margin-bottom:16px; }
     .settings-group label { font-weight:var(--font-weight-medium); display:block; margin-bottom:4px; }
     .settings-group input { width:100%; padding:10px 14px; border:1px solid var(--color-border); border-radius:var(--radius-sm); font-size:0.95rem; }
-    /* Multi-select styling */
     .question-select { width:100%; padding:8px; border:1px solid var(--color-border); border-radius:var(--radius-sm); min-height:120px; background:var(--color-surface); }
     .question-select option { padding:6px; border-bottom:1px solid var(--color-border); }
     .question-select option:checked { background:var(--color-primary); color:#fff; }
+    /* Description textarea */
+    .form-group textarea { width:100%; padding:12px 16px; border:1px solid var(--color-border); border-radius:var(--radius-sm); font-size:1rem; font-family:inherit; resize:vertical; min-height:80px; background:var(--color-surface); }
+    .form-group textarea:focus { outline:none; border-color:var(--color-primary); box-shadow:0 0 0 3px rgba(108,99,255,0.15); }
   </style>
 </head>
 <body>
-  <!-- NAVBAR (unchanged) -->
+  <!-- NAVBAR -->
   <header class="navbar"><div class="navbar__container container"><a href="#" class="navbar__brand"><span class="navbar__logo-icon material-symbols-rounded">science</span><span class="navbar__brand-text">CPES Admin</span></a><div style="display:flex;align-items:center;gap:12px;"><span id="adminEmailDisplay" style="font-size:0.9rem;color:var(--color-text-light);"></span><button id="logoutBtn" class="btn btn--outline btn--sm"><span class="material-symbols-rounded">logout</span> Logout</button></div></div></header>
   <main style="padding:30px 0;"><div class="container">
-    <!-- Stats (unchanged) -->
+    <!-- Stats -->
     <div class="stats-grid"><div class="stat-card"><div class="number" id="statQuizzes">0</div><div class="label">Quizzes</div></div><div class="stat-card"><div class="number" id="statQuestions">0</div><div class="label">Questions</div></div><div class="stat-card"><div class="number" id="statPayments">0</div><div class="label">Payments</div></div><div class="stat-card"><div class="number" id="statSubmissions">0</div><div class="label">Submissions</div></div></div>
-    <!-- Tabs (unchanged) -->
+    <!-- Tabs -->
     <div class="dashboard-tabs">
       <button class="active" data-tab="quizzes">📝 Quizzes</button>
       <button data-tab="questions">📄 Questions</button>
@@ -68,9 +69,9 @@
       <button data-tab="notices">📢 Notices</button>
       <button data-tab="settings">⚙️ Settings</button>
     </div>
-    <!-- Quizzes Tab (unchanged) -->
+    <!-- Quizzes -->
     <div class="tab-content active" id="tab-quizzes">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;"><h3>Manage Quizzes</h3><button class="btn btn--primary btn--sm" onclick="openModal('quizModal')"><span class="material-symbols-rounded">add</span> Add Quiz</button></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;"><h3>Manage Quizzes</h3><button class="btn btn--primary btn--sm" onclick="openAddQuizModal()"><span class="material-symbols-rounded">add</span> Add Quiz</button></div>
       <div class="table-wrapper"><table><thead><tr><th>Title</th><th>Price</th><th>Duration</th><th>Questions</th><th>Actions</th></tr></thead><tbody id="quizzesTableBody"><tr><td colspan="5">Loading...</td></tr></tbody></table></div>
     </div>
     <!-- Questions Tab (unchanged) -->
@@ -118,7 +119,7 @@
     </div>
   </div></main>
 
-  <!-- ========== UPDATED QUIZ MODAL ========== -->
+  <!-- ========== UPDATED QUIZ MODAL (with textarea for description) ========== -->
   <div class="modal-overlay" id="quizModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('quizModal')">&times;</button>
@@ -126,18 +127,15 @@
       <form id="quizForm">
         <input type="hidden" id="quizEditId" />
         <div class="form-group"><label>Title</label><input type="text" id="quizTitle" class="form-control" required /></div>
-        <div class="form-group"><label>Description</label><input type="text" id="quizDesc" class="form-control" /></div>
+        <div class="form-group"><label>Description</label><textarea id="quizDesc" class="form-control" rows="4" placeholder="Quiz description (use bullet points with hyphens)"></textarea></div>
         <div class="form-group"><label>Price (₹)</label><input type="number" id="quizPrice" class="form-control" required /></div>
         <div class="form-group"><label>Duration (minutes)</label><input type="number" id="quizDuration" class="form-control" value="30" required /></div>
         <div class="form-group"><label>Password</label><input type="text" id="quizPassword" class="form-control" placeholder="Exam password" required /></div>
         <div class="form-group"><label>Icon</label><input type="text" id="quizIcon" class="form-control" value="science" /></div>
-        <!-- 🔥 NEW: Question Selection -->
         <div class="form-group">
           <label>Select Questions (hold Ctrl/Cmd to select multiple)</label>
-          <select id="quizQuestionsSelect" class="question-select" multiple required>
-            <!-- Options will be populated dynamically -->
-          </select>
-          <small style="color:var(--color-text-light);">Select the questions you want in this quiz. You can select multiple.</small>
+          <select id="quizQuestionsSelect" class="question-select" multiple required></select>
+          <small style="color:var(--color-text-light);">Select the questions you want in this quiz.</small>
         </div>
         <button type="submit" class="btn btn--primary btn--block">Save Quiz</button>
       </form>
@@ -155,40 +153,54 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Auth (unchanged)
+    // Auth
     auth.onAuthStateChanged(user => { if (!user) window.location.href='login.html'; else { document.getElementById('adminEmailDisplay').textContent = user.email; loadAllData(); } });
     document.getElementById('logoutBtn').onclick = () => auth.signOut().then(() => window.location.href='login.html');
 
-    // Global functions (unchanged)
-    window.openModal = function(id, data) {
-      document.getElementById(id).classList.add('open');
-      if (id === 'quizModal' && data) {
+    // ==========================================================
+    // MODAL FUNCTIONS (UPDATED)
+    // ==========================================================
+    function openAddQuizModal() {
+      document.getElementById('quizModalTitle').textContent = 'Add Quiz';
+      document.getElementById('quizEditId').value = '';
+      document.getElementById('quizForm').reset();
+      document.getElementById('quizDuration').value = 30;
+      document.getElementById('quizIcon').value = 'science';
+      populateQuestionSelect([]);
+      document.getElementById('quizModal').classList.add('open');
+      document.getElementById('quizModalMessage').innerHTML = '';
+    }
+
+    // 🔥 NEW: Edit Quiz – fetches fresh data from Firestore
+    window.editQuiz = async function(quizId) {
+      try {
+        const doc = await db.collection('quizzes').doc(quizId).get();
+        if (!doc.exists) {
+          alert('Quiz not found.');
+          return;
+        }
+        const data = doc.data();
         document.getElementById('quizModalTitle').textContent = 'Edit Quiz';
-        document.getElementById('quizEditId').value = data.id;
+        document.getElementById('quizEditId').value = quizId;
         document.getElementById('quizTitle').value = data.title || '';
         document.getElementById('quizDesc').value = data.description || '';
         document.getElementById('quizPrice').value = data.price || '';
         document.getElementById('quizDuration').value = data.duration || 30;
         document.getElementById('quizPassword').value = data.password || '';
         document.getElementById('quizIcon').value = data.icon || 'science';
-        // Populate question select and pre-select
-        populateQuestionSelect(data.questionIds || []);
-      } else if (id === 'quizModal') {
-        document.getElementById('quizModalTitle').textContent = 'Add Quiz';
-        document.getElementById('quizEditId').value = '';
-        document.getElementById('quizForm').reset();
-        document.getElementById('quizDuration').value = 30;
-        document.getElementById('quizIcon').value = 'science';
-        populateQuestionSelect([]);
+        // Populate question select with selected IDs
+        await populateQuestionSelect(data.questionIds || []);
+        document.getElementById('quizModal').classList.add('open');
+        document.getElementById('quizModalMessage').innerHTML = '';
+      } catch (err) {
+        alert('Error loading quiz data: ' + err.message);
       }
-      document.getElementById(id+'Message').innerHTML = '';
     };
-    window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
 
-    // 🔥 Populate question multi-select
+    // Populate question multi-select (unchanged)
     async function populateQuestionSelect(selectedIds) {
       const select = document.getElementById('quizQuestionsSelect');
-      select.innerHTML = ''; // clear
+      select.innerHTML = '';
       try {
         const snap = await db.collection('questions').get();
         if (snap.empty) {
@@ -199,14 +211,12 @@
           select.appendChild(opt);
           return;
         }
-        // Sort by ID
         const docs = [];
         snap.forEach(doc => docs.push({ id: doc.id, data: doc.data() }));
         docs.sort((a, b) => parseInt(a.id) - parseInt(b.id));
         docs.forEach(({ id, data }) => {
           const opt = document.createElement('option');
           opt.value = id;
-          // Show question text truncated
           const qText = data.question ? data.question.substring(0, 60) + (data.question.length > 60 ? '...' : '') : 'Question ' + id;
           opt.textContent = `${id}. ${qText}`;
           if (selectedIds && selectedIds.includes(id)) {
@@ -224,7 +234,9 @@
       }
     }
 
-    // Data loading (unchanged except quizzes table shows count from questionIds array)
+    window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
+
+    // Data loading
     async function loadAllData() { await loadStats(); loadTableData('quizzes'); loadSettings(); }
     async function loadStats() {
       try {
@@ -236,7 +248,7 @@
       } catch(e) { console.error(e); }
     }
 
-    // Updated loadTableData – quizzes now show question count from questionIds array length
+    // Updated loadTableData – quizzes now have Edit button that calls editQuiz(quizId)
     async function loadTableData(tab) {
       const map = { quizzes:'quizzesTableBody', questions:'questionsTableBody', answerkey:'answerKeyTableBody', payments:'paymentsTableBody', submissions:'submissionsTableBody', notices:'noticesTableBody' };
       const tbody = document.getElementById(map[tab]);
@@ -250,7 +262,16 @@
           snap.forEach(doc => {
             const d = doc.data();
             const qCount = d.questionIds ? d.questionIds.length : 0;
-            html += `<tr><td><strong>${d.title||'Untitled'}</strong></td><td>₹${d.price||0}</td><td>${d.duration||30} min</td><td>${qCount}</td><td><button class="action-btn edit" onclick="openModal('quizModal',{id:'${doc.id}',title:'${d.title||''}',description:'${(d.description||'').replace(/'/g,"\\'")}',price:'${d.price||0}',duration:'${d.duration||30}',password:'${d.password||''}',icon:'${d.icon||'science'}',questionIds:${JSON.stringify(d.questionIds||[])}})">Edit</button><button class="action-btn delete" onclick="deleteQuiz('${doc.id}')">Delete</button></td></tr>`;
+            html += `<tr>
+              <td><strong>${d.title||'Untitled'}</strong></td>
+              <td>₹${d.price||0}</td>
+              <td>${d.duration||30} min</td>
+              <td>${qCount}</td>
+              <td>
+                <button class="action-btn edit" onclick="editQuiz('${doc.id}')">Edit</button>
+                <button class="action-btn delete" onclick="deleteQuiz('${doc.id}')">Delete</button>
+              </td>
+            </tr>`;
           });
         } else if (tab === 'questions') {
           const snap = await db.collection('questions').get();
@@ -299,7 +320,7 @@
       } catch(err) { tbody.innerHTML = `<tr><td colspan="10">Error: ${err.message}</td></tr>`; console.error(err); }
     }
 
-    // Quiz CRUD (updated to handle questionIds)
+    // Quiz CRUD – Updated to use async/await
     document.getElementById('quizForm').onsubmit = async function(e) {
       e.preventDefault();
       const id = document.getElementById('quizEditId').value;
@@ -333,6 +354,7 @@
         setTimeout(() => { closeModal('quizModal'); loadTableData('quizzes'); loadStats(); }, 1000);
       } catch(err) { msg.innerHTML = `<div class="alert alert--error">❌ ${err.message}</div>`; }
     };
+
     window.deleteQuiz = async function(id) { if(confirm('Delete?')) { try { await db.collection('quizzes').doc(id).delete(); loadTableData('quizzes'); loadStats(); } catch(e){alert(e.message);} } };
 
     // Questions Upload (unchanged)
@@ -401,7 +423,7 @@
     window.verifyPayment = async function(id) { try { await db.collection('payment').doc(id).update({verified:true, verifiedAt:new Date().toISOString()}); loadTableData('payments'); loadStats(); } catch(e){alert(e.message);} };
     window.deletePayment = async function(id) { if(confirm('Delete?')) { try { await db.collection('payment').doc(id).delete(); loadTableData('payments'); loadStats(); } catch(e){alert(e.message);} } };
 
-    // Submissions (unchanged, but we keep manual process for existing)
+    // Submissions (unchanged)
     window.processSubmission = async function(submissionId) {
       if (!confirm('Process this submission?')) return;
       try {
@@ -421,7 +443,9 @@
         const detailed = [];
         questionIds.forEach(qId => {
           const userAns = answers[qId];
-          const correctAns = answerKeys[qId];
+          let correctAns = answerKeys[qId];
+          // Auto-detect 0-based vs 1-based
+          if (correctAns >= 1 && correctAns <= 4) correctAns = correctAns - 1;
           const isCorrect = (userAns === correctAns);
           if (isCorrect) correct++;
           detailed.push({ questionId: qId, userAnswer: userAns, correctAnswer: correctAns, isCorrect });

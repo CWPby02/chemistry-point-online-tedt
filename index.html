@@ -35,61 +35,12 @@ Displays quizzes, notices, and links to payment.
       margin-top: auto;
     }
     .hero__wave {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 100'%3E%3Cpath fill='%23f8f9fe' d='M0,50 C300,100 600,0 1200,50 L1200,100 L0,100 Z'/%3E%3C/svg%3E") no-repeat bottom;
-      background-size: cover;
-      pointer-events: none;
+      display: none;
     }
-
-    /* Fix: Preserve line breaks in descriptions */
+    /* 🔥 Fix: Preserve line breaks in descriptions */
     .quiz-card__desc,
     .notice-card__desc {
       white-space: pre-wrap;
-    }
-
-    /* Payment Confirmation Modal */
-    .payment-modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(4px);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-    }
-    .payment-modal-overlay.open {
-      display: flex;
-    }
-    .payment-modal-box {
-      background: var(--color-surface);
-      border-radius: var(--radius-md);
-      padding: 32px 28px;
-      max-width: 420px;
-      width: 90%;
-      text-align: center;
-      box-shadow: var(--shadow-lg);
-      position: relative;
-    }
-    .payment-modal-box h3 {
-      margin-bottom: 8px;
-    }
-    .payment-modal-box p {
-      margin-bottom: 20px;
-      color: var(--color-text-secondary);
-    }
-    .payment-modal-box .btn-group {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .payment-modal-box .btn-group .btn {
-      min-width: 100px;
     }
   </style>
 </head>
@@ -98,24 +49,28 @@ Displays quizzes, notices, and links to payment.
   <!-- ==================== HEADER / NAVBAR ==================== -->
   <header class="navbar" role="banner">
     <div class="navbar__container container">
-      <a href="index.html" class="navbar__brand">
-        <span class="navbar__logo-icon material-symbols-rounded">science</span>
-        <span class="navbar__brand-text">CPBPS</span>
-        <span class="navbar__brand-sub">Chemistry Point BY Pradeep Sir </span>
-      </a>
-      <button class="navbar__toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+      <!-- Brand / Logo -->
+     <a href="index.html" class="navbar__brand">
+  <img src="assets/images/logo.png" alt="CPES Logo" class="navbar__logo-image" />
+  <span class="navbar__brand-sub">Chemistry Point BY Pradeep Sir</span>
+</a>
+
+      <!-- Mobile Toggle Button -->
+      <button class="navbar__toggle" id="navbarToggle" aria-label="Toggle navigation menu" aria-expanded="false">
         <span class="material-symbols-rounded">menu</span>
       </button>
-      <nav class="navbar__nav" aria-label="Primary navigation">
+
+      <!-- Navigation -->
+      <nav class="navbar__nav" id="navbarNav" aria-label="Primary navigation">
         <ul class="navbar__menu">
           <li><a href="index.html" class="navbar__link active">Home</a></li>
-          <li><a href="student/video.html" class="navbar__link">🎥 Video</a></li>
+          <li><a href="student/video.html" class="navbar__link">Video</a></li>
           <li><a href="#quizzes" class="navbar__link">Exams</a></li>
           <li><a href="#notices" class="navbar__link">Notices</a></li>
         </ul>
         <div class="navbar__actions">
-          <!-- Admin link hidden -->
-        </div>
+         <!-- <a href="admin/login.html" class="btn btn--outline btn--sm">Admin</a>
+        --> </div>
       </nav>
     </div>
   </header>
@@ -213,7 +168,7 @@ Displays quizzes, notices, and links to payment.
         <div class="footer__nav-col">
           <h4>Admin</h4>
           <ul>
-            <li><!--<a href="admin/login.html">Admin Login</a>--></li>
+            <li><a href="admin/login.html">Admin Login</a></li>
           </ul>
         </div>
       </nav>
@@ -224,18 +179,6 @@ Displays quizzes, notices, and links to payment.
       </div>
     </div>
   </footer>
-
-  <!-- ==================== PAYMENT CONFIRMATION MODAL ==================== -->
-  <div class="payment-modal-overlay" id="paymentModal">
-    <div class="payment-modal-box">
-      <h3>🧾 भुगतान की पुष्टि</h3>
-      <p>क्या आपने पहले ही इस क्विज़ के लिए <strong>भुगतान</strong> कर दिया है?</p>
-      <div class="btn-group">
-        <button class="btn btn--primary" id="paymentYesBtn">✅ हाँ</button>
-        <button class="btn btn--outline" id="paymentNoBtn">❌ नहीं</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ========================================================== -->
   <!-- SCRIPTS -->
@@ -255,50 +198,22 @@ Displays quizzes, notices, and links to payment.
     const db = firebase.firestore();
 
     // ==========================================================
-    // PAYMENT MODAL LOGIC
+    // NAVBAR TOGGLE (Mobile Menu)
     // ==========================================================
-    let pendingQuizId = null;
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleBtn = document.getElementById('navbarToggle');
+      const navMenu = document.getElementById('navbarNav');
 
-    function showPaymentModal(quizId) {
-      pendingQuizId = quizId;
-      
-      // Check if already confirmed for this quiz in localStorage
-      const confirmed = localStorage.getItem(`cpes_payment_confirmed_${quizId}`);
-      if (confirmed === 'true') {
-        // Already confirmed, go directly to verify page
-        window.location.href = `student/verify.html?quiz=${quizId}`;
-        return;
-      }
-      
-      document.getElementById('paymentModal').classList.add('open');
-    }
-
-    document.getElementById('paymentYesBtn').addEventListener('click', function() {
-      if (pendingQuizId) {
-        // Save confirmation in localStorage so next time skip modal
-        localStorage.setItem(`cpes_payment_confirmed_${pendingQuizId}`, 'true');
-        window.location.href = `student/verify.html?quiz=${pendingQuizId}`;
-      }
-    });
-
-    document.getElementById('paymentNoBtn').addEventListener('click', function() {
-      if (pendingQuizId) {
-        // Remove any previous confirmation for this quiz
-        localStorage.removeItem(`cpes_payment_confirmed_${pendingQuizId}`);
-        window.location.href = `student/payment.html?quiz=${pendingQuizId}`;
-      }
-    });
-
-    // Close modal if user clicks outside (optional)
-    document.getElementById('paymentModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        this.classList.remove('open');
-        pendingQuizId = null;
+      if (toggleBtn && navMenu) {
+        toggleBtn.addEventListener('click', function() {
+          const isOpen = navMenu.classList.toggle('open');
+          toggleBtn.setAttribute('aria-expanded', isOpen);
+        });
       }
     });
 
     // ==========================================================
-    // LOAD QUIZZES (UPDATED)
+    // LOAD QUIZZES
     // ==========================================================
     async function loadQuizzes() {
       const container = document.getElementById('quizzesContainer');
@@ -314,7 +229,10 @@ Displays quizzes, notices, and links to payment.
           const featured = q.featured ? 'quiz-card--featured' : '';
           const badge = q.featured ? `<div class="quiz-card__badge">Popular</div>` : '';
           
+          // Format description: replace \n with <br>
           const descHtml = (q.description || '').replace(/\n/g, '<br>');
+          
+          // Get question count from questionIds array
           const questionCount = (q.questionIds && Array.isArray(q.questionIds)) ? q.questionIds.length : (q.questionsCount || 0);
           
           html += `
@@ -330,9 +248,9 @@ Displays quizzes, notices, and links to payment.
                 <span><span class="material-symbols-rounded">quiz</span> ${questionCount} Qs</span>
               </div>
               <div class="quiz-card__price">₹${q.price || 0}</div>
-              <button class="btn btn--primary btn--block" onclick="showPaymentModal('${doc.id}')">
+              <a href="student/payment.html?quiz=${doc.id}" class="btn btn--primary btn--block">
                 <span class="material-symbols-rounded">shopping_cart</span> Purchase
-              </button>
+              </a>
             </article>
           `;
         });
@@ -380,7 +298,7 @@ Displays quizzes, notices, and links to payment.
     }
 
     // ==========================================================
-    // LOAD STATS
+    // LOAD STATS (for hero)
     // ==========================================================
     async function loadStats() {
       try {
@@ -407,15 +325,6 @@ Displays quizzes, notices, and links to payment.
         console.error('Stats error:', err);
       }
     }
-
-    // ==========================================================
-    // NAVBAR TOGGLE
-    // ==========================================================
-    document.querySelector('.navbar__toggle').addEventListener('click', function() {
-      const nav = document.querySelector('.navbar__nav');
-      nav.classList.toggle('open');
-      this.setAttribute('aria-expanded', nav.classList.contains('open'));
-    });
 
     // ==========================================================
     // INIT

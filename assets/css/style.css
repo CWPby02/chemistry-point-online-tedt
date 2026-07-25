@@ -1,52 +1,56 @@
 /* ==========================================================
-   assets/css/style.css
-   CPES — Global Styles, Variables, Typography & Reset
+   style.css – CPES Premium Design (Based on Screenshot)
    ========================================================== */
 
-/* ---------- CSS Variables (2026 Premium Palette) ---------- */
+/* ---------- Google Font ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* ---------- CSS Variables ---------- */
 :root {
   /* Primary Colors */
-  --color-primary: #6C63FF;
-  --color-primary-dark: #5A52D5;
-  --color-primary-light: #8B83FF;
-  --color-primary-gradient: linear-gradient(135deg, #6C63FF, #3F3D9E);
-
+  --color-primary: #1A2A4A;
+  --color-primary-light: #2E4A7A;
+  --color-primary-dark: #0F1A2E;
+  
+  /* Accent Colors */
+  --color-accent: #F4A261;
+  --color-accent-dark: #E67E22;
+  --color-accent-light: #FAD4B0;
+  
+  /* Secondary Colors */
+  --color-secondary: #2E86C1;
+  --color-secondary-light: #5DADE2;
+  
   /* Neutrals */
-  --color-bg: #F8F9FE;
+  --color-bg: #F8F9FA;
   --color-surface: #FFFFFF;
-  --color-surface-glass: rgba(255, 255, 255, 0.55);
-  --color-text: #1A1A2E;
-  --color-text-secondary: #4A4A6A;
-  --color-text-light: #7A7A9A;
-  --color-border: #E2E4F0;
-
-  /* Accents */
-  --color-success: #2ECC71;
-  --color-warning: #F1C40F;
-  --color-danger: #E74C3C;
-  --color-info: #3498DB;
-
-  /* Shadows & Effects */
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.10);
-  --shadow-glass: 0 8px 32px rgba(108, 99, 255, 0.12);
-
+  --color-text: #1A2A4A;
+  --color-text-secondary: #4A5A7A;
+  --color-text-light: #7A8AA8;
+  --color-border: #E2E8F0;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(26, 42, 74, 0.08);
+  --shadow-md: 0 4px 16px rgba(26, 42, 74, 0.12);
+  --shadow-lg: 0 8px 32px rgba(26, 42, 74, 0.16);
+  --shadow-accent: 0 4px 16px rgba(244, 162, 97, 0.3);
+  
   /* Border Radius */
   --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
   --radius-full: 9999px;
-
-  /* Typography */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  
+  /* Font */
+  --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-size-base: 16px;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-
+  --font-weight-extrabold: 800;
+  
   /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -55,8 +59,8 @@
   --spacing-xl: 32px;
   --spacing-xxl: 48px;
   --spacing-xxxl: 64px;
-
-  /* Container Widths */
+  
+  /* Container */
   --container-max-width: 1200px;
   --container-padding: 20px;
 }
@@ -88,22 +92,17 @@ body {
 }
 
 /* ---------- Typography ---------- */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-bold);
   line-height: 1.2;
   color: var(--color-text);
 }
 
 h1 {
-  font-size: 2.8rem;
+  font-size: 3rem;
 }
 h2 {
-  font-size: 2.2rem;
+  font-size: 2.4rem;
 }
 h3 {
   font-size: 1.6rem;
@@ -124,26 +123,27 @@ p {
 }
 
 a {
-  color: var(--color-primary);
+  color: var(--color-accent);
   text-decoration: none;
   transition: color 0.2s;
 }
 a:hover {
-  color: var(--color-primary-dark);
+  color: var(--color-accent-dark);
 }
 
-ul,
-ol {
+/* ---------- Lists Reset ---------- */
+ul, ol {
   list-style: none;
 }
 
+/* ---------- Images ---------- */
 img {
   max-width: 100%;
   height: auto;
   display: block;
 }
 
-/* ---------- Utility Classes ---------- */
+/* ---------- Utilities ---------- */
 .container {
   max-width: var(--container-max-width);
   margin: 0 auto;
@@ -156,39 +156,8 @@ img {
 .text-muted {
   color: var(--color-text-light);
 }
-.mt-1 {
-  margin-top: var(--spacing-sm);
-}
-.mt-2 {
-  margin-top: var(--spacing-md);
-}
-.mt-3 {
-  margin-top: var(--spacing-lg);
-}
-.mt-4 {
-  margin-top: var(--spacing-xl);
-}
-.mb-1 {
-  margin-bottom: var(--spacing-sm);
-}
-.mb-2 {
-  margin-bottom: var(--spacing-md);
-}
-.mb-3 {
-  margin-bottom: var(--spacing-lg);
-}
-.mb-4 {
-  margin-bottom: var(--spacing-xl);
-}
-
-/* ---------- Glassmorphism Base ---------- */
-.glass {
-  background: var(--color-surface-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: var(--shadow-glass);
-  border-radius: var(--radius-md);
+.text-accent {
+  color: var(--color-accent);
 }
 
 /* ---------- Scrollbar ---------- */
@@ -200,24 +169,21 @@ img {
   background: var(--color-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-primary-light);
+  background: var(--color-accent);
   border-radius: var(--radius-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary);
+  background: var(--color-accent-dark);
 }
 
 /* ---------- Selection ---------- */
 ::selection {
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: #fff;
 }
 
 /* ---------- Responsive Typography ---------- */
 @media (max-width: 768px) {
-  :root {
-    --font-size-base: 15px;
-  }
   h1 {
     font-size: 2.2rem;
   }

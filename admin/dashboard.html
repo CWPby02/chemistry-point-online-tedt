@@ -48,9 +48,37 @@
     .question-select { width:100%; padding:8px; border:1px solid var(--color-border); border-radius:var(--radius-sm); min-height:120px; background:var(--color-surface); }
     .question-select option { padding:6px; border-bottom:1px solid var(--color-border); }
     .question-select option:checked { background:var(--color-primary); color:#fff; }
-    /* Description textarea */
     .form-group textarea { width:100%; padding:12px 16px; border:1px solid var(--color-border); border-radius:var(--radius-sm); font-size:1rem; font-family:inherit; resize:vertical; min-height:80px; background:var(--color-surface); }
     .form-group textarea:focus { outline:none; border-color:var(--color-primary); box-shadow:0 0 0 3px rgba(108,99,255,0.15); }
+    .settings-video-preview {
+      margin-top: 6px;
+      padding: 8px 12px;
+      background: #f0f4ff;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      border-left: 3px solid var(--color-primary);
+    }
+    .settings-video-preview .video-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .settings-video-preview .video-status .remove-btn {
+      background: none;
+      border: none;
+      color: var(--color-danger);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-danger);
+      transition: all 0.2s;
+    }
+    .settings-video-preview .video-status .remove-btn:hover {
+      background: var(--color-danger);
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -74,7 +102,7 @@
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;"><h3>Manage Quizzes</h3><button class="btn btn--primary btn--sm" onclick="openAddQuizModal()"><span class="material-symbols-rounded">add</span> Add Quiz</button></div>
       <div class="table-wrapper"><table><thead><tr><th>Title</th><th>Price</th><th>Duration</th><th>Questions</th><th>Actions</th></tr></thead><tbody id="quizzesTableBody"><tr><td colspan="5">Loading...</td></tr></tbody></table></div>
     </div>
-    <!-- Questions Tab (unchanged) -->
+    <!-- Questions Tab -->
     <div class="tab-content" id="tab-questions">
       <h3>Upload Questions (JSON)</h3>
       <p class="text-muted">Format: [{"id":121, "question":"...", "options":["opt1","opt2","opt3","opt4"]}]</p>
@@ -82,7 +110,7 @@
       <div id="questionsUploadStatus" class="upload-status"></div>
       <div class="table-wrapper"><table><thead><tr><th>ID</th><th>Question</th><th>Options</th><th>Actions</th></tr></thead><tbody id="questionsTableBody"><tr><td colspan="4">No questions.</td></tr></tbody></table></div>
     </div>
-    <!-- Answer Key Tab (unchanged) -->
+    <!-- Answer Key Tab -->
     <div class="tab-content" id="tab-answerkey">
       <h3>Upload Answer Key (JSON)</h3>
       <p class="text-muted">Format: {"121": 2, "122": 1, ...} (0-based index)</p>
@@ -90,22 +118,22 @@
       <div id="answerKeyUploadStatus" class="upload-status"></div>
       <div class="table-wrapper"><table><thead><tr><th>Question ID</th><th>Correct Option</th><th>Actions</th></tr></thead><tbody id="answerKeyTableBody"><tr><td colspan="3">No answer key.</td></tr></tbody></table></div>
     </div>
-    <!-- Payments Tab (unchanged) -->
+    <!-- Payments Tab -->
     <div class="tab-content" id="tab-payments">
       <h3>Payment Requests (UTR)</h3>
       <div class="table-wrapper"><table><thead><tr><th>UTR</th><th>Student</th><th>Mobile</th><th>Quiz</th><th>Status</th><th>Action</th></tr></thead><tbody id="paymentsTableBody"><tr><td colspan="6">Loading...</td></tr></tbody></table></div>
     </div>
-    <!-- Submissions Tab (unchanged) -->
+    <!-- Submissions Tab -->
     <div class="tab-content" id="tab-submissions">
       <h3>Pending Submissions</h3>
       <div class="table-wrapper"><table><thead><tr><th>Student</th><th>Quiz</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody id="submissionsTableBody"><tr><td colspan="5">Loading...</td></tr></tbody></table></div>
     </div>
-    <!-- Notices Tab (unchanged) -->
+    <!-- Notices Tab -->
     <div class="tab-content" id="tab-notices">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;"><h3>Notices</h3><button class="btn btn--primary btn--sm" onclick="openModal('noticeModal')"><span class="material-symbols-rounded">add</span> Add Notice</button></div>
       <div class="table-wrapper"><table><thead><tr><th>Title</th><th>Tag</th><th>Date</th><th>Actions</th></tr></thead><tbody id="noticesTableBody"><tr><td colspan="4">Loading...</td></tr></tbody></table></div>
     </div>
-    <!-- Settings Tab (unchanged) -->
+    <!-- ====== SETTINGS TAB (UPDATED WITH VIDEO) ====== -->
     <div class="tab-content" id="tab-settings">
       <h3>Settings</h3>
       <form id="settingsForm">
@@ -113,13 +141,27 @@
         <div class="settings-group"><label>UPI ID</label><input type="text" id="settingUpiId" placeholder="chemistrypoint@upi" /></div>
         <div class="settings-group"><label>Instagram ID</label><input type="text" id="settingInstaId" placeholder="@chemistrypoint" /></div>
         <div class="settings-group"><label>WhatsApp Number</label><input type="text" id="settingWhatsApp" placeholder="+91 9876543210" /></div>
+        
+        <!-- 🔥 NEW: Video URL Field -->
+        <div class="settings-group">
+          <label>YouTube Video URL (Unlisted/Public)</label>
+          <input type="url" id="settingVideoUrl" placeholder="https://www.youtube.com/embed/..." />
+          <small style="color:var(--color-text-light);">Paste the YouTube embed URL or normal watch link (auto-converts to embed)</small>
+          <div id="videoStatus" class="settings-video-preview" style="display:none;">
+            <div class="video-status">
+              <span>📹 <span id="videoUrlDisplay"></span></span>
+              <button type="button" class="remove-btn" onclick="removeVideo()">✕ Remove</button>
+            </div>
+          </div>
+        </div>
+        
         <button type="submit" class="btn btn--primary">💾 Save Settings</button>
       </form>
       <div id="settingsMessage" style="margin-top:12px;"></div>
     </div>
   </div></main>
 
-  <!-- ========== UPDATED QUIZ MODAL (with textarea for description) ========== -->
+  <!-- Quiz Modal -->
   <div class="modal-overlay" id="quizModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal('quizModal')">&times;</button>
@@ -143,11 +185,13 @@
     </div>
   </div>
 
-  <!-- Notice Modal (unchanged) -->
+  <!-- Notice Modal -->
   <div class="modal-overlay" id="noticeModal"><div class="modal-box"><button class="modal-close" onclick="closeModal('noticeModal')">&times;</button><h3>Add Notice</h3><form id="noticeForm"><div class="form-group"><label>Title</label><input type="text" id="noticeTitle" class="form-control" required /></div><div class="form-group"><label>Description</label><input type="text" id="noticeDesc" class="form-control" required /></div><div class="form-group"><label>Tag</label><input type="text" id="noticeTag" class="form-control" value="Update" /></div><div class="form-group"><label>Icon</label><input type="text" id="noticeIcon" class="form-control" value="campaign" /></div><button type="submit" class="btn btn--primary btn--block">Add Notice</button></form><div id="noticeModalMessage" style="margin-top:12px;"></div></div></div>
 
   <script>
-    // Firebase Config (unchanged)
+    // ==========================================================
+    // FIREBASE CONFIG
+    // ==========================================================
     const firebaseConfig = { apiKey: "AIzaSyAJxrqXisH2oBk8naB7TJMnGsoO2RIm6Tg", authDomain: "cpes-a88a2.firebaseapp.com", databaseURL: "https://cpes-a88a2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "cpes-a88a2", storageBucket: "cpes-a88a2.firebasestorage.app", messagingSenderId: "350376945623", appId: "1:350376945623:web:eb884eb5cdac3f05aa0d92" };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
@@ -158,7 +202,7 @@
     document.getElementById('logoutBtn').onclick = () => auth.signOut().then(() => window.location.href='login.html');
 
     // ==========================================================
-    // MODAL FUNCTIONS (UPDATED)
+    // MODAL FUNCTIONS
     // ==========================================================
     function openAddQuizModal() {
       document.getElementById('quizModalTitle').textContent = 'Add Quiz';
@@ -171,14 +215,10 @@
       document.getElementById('quizModalMessage').innerHTML = '';
     }
 
-    // 🔥 NEW: Edit Quiz – fetches fresh data from Firestore
     window.editQuiz = async function(quizId) {
       try {
         const doc = await db.collection('quizzes').doc(quizId).get();
-        if (!doc.exists) {
-          alert('Quiz not found.');
-          return;
-        }
+        if (!doc.exists) { alert('Quiz not found.'); return; }
         const data = doc.data();
         document.getElementById('quizModalTitle').textContent = 'Edit Quiz';
         document.getElementById('quizEditId').value = quizId;
@@ -188,7 +228,6 @@
         document.getElementById('quizDuration').value = data.duration || 30;
         document.getElementById('quizPassword').value = data.password || '';
         document.getElementById('quizIcon').value = data.icon || 'science';
-        // Populate question select with selected IDs
         await populateQuestionSelect(data.questionIds || []);
         document.getElementById('quizModal').classList.add('open');
         document.getElementById('quizModalMessage').innerHTML = '';
@@ -197,7 +236,6 @@
       }
     };
 
-    // Populate question multi-select (unchanged)
     async function populateQuestionSelect(selectedIds) {
       const select = document.getElementById('quizQuestionsSelect');
       select.innerHTML = '';
@@ -219,9 +257,7 @@
           opt.value = id;
           const qText = data.question ? data.question.substring(0, 60) + (data.question.length > 60 ? '...' : '') : 'Question ' + id;
           opt.textContent = `${id}. ${qText}`;
-          if (selectedIds && selectedIds.includes(id)) {
-            opt.selected = true;
-          }
+          if (selectedIds && selectedIds.includes(id)) opt.selected = true;
           select.appendChild(opt);
         });
       } catch (err) {
@@ -236,8 +272,11 @@
 
     window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
 
-    // Data loading
+    // ==========================================================
+    // DATA LOADING
+    // ==========================================================
     async function loadAllData() { await loadStats(); loadTableData('quizzes'); loadSettings(); }
+    
     async function loadStats() {
       try {
         const [qSnap, qsSnap, pSnap, sSnap] = await Promise.all([db.collection('quizzes').get(), db.collection('questions').get(), db.collection('payment').get(), db.collection('submissions').get()]);
@@ -248,7 +287,6 @@
       } catch(e) { console.error(e); }
     }
 
-    // Updated loadTableData – quizzes now have Edit button that calls editQuiz(quizId)
     async function loadTableData(tab) {
       const map = { quizzes:'quizzesTableBody', questions:'questionsTableBody', answerkey:'answerKeyTableBody', payments:'paymentsTableBody', submissions:'submissionsTableBody', notices:'noticesTableBody' };
       const tbody = document.getElementById(map[tab]);
@@ -320,7 +358,9 @@
       } catch(err) { tbody.innerHTML = `<tr><td colspan="10">Error: ${err.message}</td></tr>`; console.error(err); }
     }
 
-    // Quiz CRUD – Updated to use async/await
+    // ==========================================================
+    // QUIZ CRUD
+    // ==========================================================
     document.getElementById('quizForm').onsubmit = async function(e) {
       e.preventDefault();
       const id = document.getElementById('quizEditId').value;
@@ -357,7 +397,9 @@
 
     window.deleteQuiz = async function(id) { if(confirm('Delete?')) { try { await db.collection('quizzes').doc(id).delete(); loadTableData('quizzes'); loadStats(); } catch(e){alert(e.message);} } };
 
-    // Questions Upload (unchanged)
+    // ==========================================================
+    // QUESTIONS UPLOAD
+    // ==========================================================
     document.getElementById('questionsFileInput').onchange = async function(e) {
       if (this.files.length) await uploadQuestionsFile(this.files[0]);
       this.value = '';
@@ -388,7 +430,9 @@
     }
     window.deleteQuestion = async function(id) { if(confirm('Delete?')) { try { await db.collection('questions').doc(id).delete(); loadTableData('questions'); loadStats(); } catch(e){alert(e.message);} } };
 
-    // Answer Key Upload (unchanged)
+    // ==========================================================
+    // ANSWER KEY UPLOAD
+    // ==========================================================
     document.getElementById('answerKeyFileInput').onchange = async function(e) {
       if (this.files.length) await uploadAnswerKeyFile(this.files[0]);
       this.value = '';
@@ -419,11 +463,15 @@
     }
     window.deleteAnswerKey = async function(id) { if(confirm('Delete?')) { try { await db.collection('answerKey').doc(id).delete(); loadTableData('answerkey'); loadStats(); } catch(e){alert(e.message);} } };
 
-    // Payments (unchanged)
+    // ==========================================================
+    // PAYMENTS
+    // ==========================================================
     window.verifyPayment = async function(id) { try { await db.collection('payment').doc(id).update({verified:true, verifiedAt:new Date().toISOString()}); loadTableData('payments'); loadStats(); } catch(e){alert(e.message);} };
     window.deletePayment = async function(id) { if(confirm('Delete?')) { try { await db.collection('payment').doc(id).delete(); loadTableData('payments'); loadStats(); } catch(e){alert(e.message);} } };
 
-    // Submissions (unchanged)
+    // ==========================================================
+    // SUBMISSIONS
+    // ==========================================================
     window.processSubmission = async function(submissionId) {
       if (!confirm('Process this submission?')) return;
       try {
@@ -444,7 +492,6 @@
         questionIds.forEach(qId => {
           const userAns = answers[qId];
           let correctAns = answerKeys[qId];
-          // Auto-detect 0-based vs 1-based
           if (correctAns >= 1 && correctAns <= 4) correctAns = correctAns - 1;
           const isCorrect = (userAns === correctAns);
           if (isCorrect) correct++;
@@ -461,7 +508,9 @@
     };
     window.deleteSubmission = async function(id) { if(confirm('Delete?')) { try { await db.collection('submissions').doc(id).delete(); loadTableData('submissions'); loadStats(); } catch(e){alert(e.message);} } };
 
-    // Notices (unchanged)
+    // ==========================================================
+    // NOTICES
+    // ==========================================================
     document.getElementById('noticeForm').onsubmit = async function(e) {
       e.preventDefault();
       const data = { title: document.getElementById('noticeTitle').value.trim(), description: document.getElementById('noticeDesc').value.trim(), tag: document.getElementById('noticeTag').value.trim()||'Update', icon: document.getElementById('noticeIcon').value.trim()||'campaign', date: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}), createdAt: new Date().toISOString() };
@@ -470,7 +519,9 @@
     };
     window.deleteNotice = async function(id) { if(confirm('Delete?')) { try { await db.collection('notices').doc(id).delete(); loadTableData('notices'); } catch(e){alert(e.message);} } };
 
-    // Settings (unchanged)
+    // ==========================================================
+    // 🔥 SETTINGS (UPDATED WITH VIDEO)
+    // ==========================================================
     async function loadSettings() {
       try {
         const doc = await db.collection('settings').doc('settings').get();
@@ -480,17 +531,57 @@
           document.getElementById('settingUpiId').value = d.upiId || '';
           document.getElementById('settingInstaId').value = d.instaId || '';
           document.getElementById('settingWhatsApp').value = d.whatsApp || '';
+          // 🔥 Load video URL
+          const videoUrl = d.videoUrl || '';
+          document.getElementById('settingVideoUrl').value = videoUrl;
+          updateVideoStatus(videoUrl);
         }
       } catch(e) { console.error(e); }
     }
-    document.getElementById('settingsForm').onsubmit = async function(e) {
-      e.preventDefault();
-      const data = { qrCodeUrl: document.getElementById('settingQrCode').value.trim(), upiId: document.getElementById('settingUpiId').value.trim(), instaId: document.getElementById('settingInstaId').value.trim(), whatsApp: document.getElementById('settingWhatsApp').value.trim(), updatedAt: new Date().toISOString() };
-      const msg = document.getElementById('settingsMessage');
-      try { await db.collection('settings').doc('settings').set(data, {merge: true}); msg.innerHTML = '<div class="alert alert--success">✅ Settings saved!</div>'; } catch(err) { msg.innerHTML = `<div class="alert alert--error">❌ ${err.message}</div>`; }
+
+    function updateVideoStatus(videoUrl) {
+      const statusDiv = document.getElementById('videoStatus');
+      const displaySpan = document.getElementById('videoUrlDisplay');
+      if (videoUrl && videoUrl.trim() !== '') {
+        statusDiv.style.display = 'block';
+        displaySpan.textContent = videoUrl;
+      } else {
+        statusDiv.style.display = 'none';
+        displaySpan.textContent = '';
+      }
+    }
+
+    // 🔥 Remove Video Function
+    window.removeVideo = function() {
+      document.getElementById('settingVideoUrl').value = '';
+      updateVideoStatus('');
+      document.getElementById('settingsMessage').innerHTML = '<div class="alert alert--info">Video URL cleared. Click "Save Settings" to apply.</div>';
     };
 
-    // Tabs (unchanged)
+    document.getElementById('settingsForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const videoUrl = document.getElementById('settingVideoUrl').value.trim();
+      const data = {
+        qrCodeUrl: document.getElementById('settingQrCode').value.trim(),
+        upiId: document.getElementById('settingUpiId').value.trim(),
+        instaId: document.getElementById('settingInstaId').value.trim(),
+        whatsApp: document.getElementById('settingWhatsApp').value.trim(),
+        videoUrl: videoUrl,
+        updatedAt: new Date().toISOString()
+      };
+      const msg = document.getElementById('settingsMessage');
+      try {
+        await db.collection('settings').doc('settings').set(data, {merge: true});
+        updateVideoStatus(videoUrl);
+        msg.innerHTML = '<div class="alert alert--success">✅ Settings saved!</div>';
+      } catch(err) {
+        msg.innerHTML = `<div class="alert alert--error">❌ ${err.message}</div>`;
+      }
+    };
+
+    // ==========================================================
+    // TABS & MODAL CLOSE
+    // ==========================================================
     document.querySelectorAll('.dashboard-tabs button').forEach(btn => {
       btn.onclick = function() {
         document.querySelectorAll('.dashboard-tabs button').forEach(b => b.classList.remove('active'));
@@ -502,12 +593,13 @@
       };
     });
 
-    // Close modal on overlay click (unchanged)
     document.querySelectorAll('.modal-overlay').forEach(el => {
       el.addEventListener('click', function(e) { if (e.target === this) closeModal(this.id); });
     });
 
-    // Init
+    // ==========================================================
+    // INIT
+    // ==========================================================
     loadAllData();
   </script>
 </body>

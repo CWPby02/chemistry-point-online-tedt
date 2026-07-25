@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Lecture — CPES</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/layout.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <style>
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 */
+      height: 0;
+      overflow: hidden;
+      max-width: 100%;
+      background: #000;
+      border-radius: var(--radius-md);
+      margin-top: 20px;
+    }
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .no-video {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--color-text-light);
+    }
+    .no-video .material-symbols-rounded {
+      font-size: 4rem;
+      color: var(--color-border);
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar__container container">
+      <a href="../index.html" class="navbar__brand">
+        <span class="navbar__logo-icon material-symbols-rounded">science</span>
+        <span class="navbar__brand-text">CPES</span>
+      </a>
+      <a href="../index.html" class="btn btn--outline btn--sm">Home</a>
+    </div>
+  </header>
+
+  <main style="padding:30px 0;">
+    <div class="container" style="max-width:800px;">
+      <div class="glass-card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+          <span class="material-symbols-rounded" style="color:var(--color-primary);">play_circle</span>
+          Video Lecture
+        </h2>
+        <div id="videoContainer">
+          <div class="no-video">
+            <span class="material-symbols-rounded">video_library</span>
+            <h3>Loading video...</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJxrqXisH2oBk8naB7TJMnGsoO2RIm6Tg",
+      authDomain: "cpes-a88a2.firebaseapp.com",
+      databaseURL: "https://cpes-a88a2-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "cpes-a88a2",
+      storageBucket: "cpes-a88a2.firebasestorage.app",
+      messagingSenderId: "350376945623",
+      appId: "1:350376945623:web:eb884eb5cdac3f05aa0d92"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function loadVideo() {
+      const container = document.getElementById('videoContainer');
+      try {
+        const doc = await db.collection('settings').doc('settings').get();
+        if (doc.exists) {
+          const data = doc.data();
+          const videoUrl = data.videoUrl || '';
+          if (videoUrl) {
+            // Convert to embed URL if needed
+            let embedUrl = videoUrl;
+            // If it's a watch URL (youtube.com/watch?v=...), convert to embed
+            if (videoUrl.includes('watch?v=')) {
+              const videoId = new URLSearchParams(new URL(videoUrl).search).get('v');
+              if (videoId) embedUrl = `https://www.youtube.com/embed/${videoId}`;
+            }
+            // If it's already embed URL, use as is
+            container.innerHTML = `
+              <div class="video-container">
+                <iframe src="${embedUrl}" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                </iframe>
+              </div>
+            `;
+          } else {
+            container.innerHTML = `
+              <div class="no-video">
+                <span class="material-symbols-rounded">video_library</span>
+                <h3>No video uploaded yet</h3>
+                <p class="text-muted">Please check back later.</p>
+              </div>
+            `;
+          }
+        } else {
+          container.innerHTML = `
+            <div class="no-video">
+              <span class="material-symbols-rounded">video_library</span>
+              <h3>No video uploaded yet</h3>
+            </div>
+          `;
+        }
+      } catch (err) {
+        container.innerHTML = `<p style="color:var(--color-danger);">Error loading video: ${err.message}</p>`;
+      }
+    }
+
+    loadVideo();
+  </script>
+</body>
+</html>

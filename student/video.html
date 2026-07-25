@@ -81,22 +81,65 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // ==========================================================
+    // 🔥 AUTO-CONVERT ANY YOUTUBE LINK TO EMBED URL
+    // ==========================================================
+    function getEmbedUrl(url) {
+      if (!url) return null;
+      
+      // If already an embed URL, return as is
+      if (url.includes('/embed/')) return url;
+      
+      let videoId = null;
+      
+      // Case 1: youtu.be/VIDEO_ID (Short URL)
+      // Example: https://youtu.be/etKyimn65oc?si=oq4yhEjhNv-mqvoI
+      const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
+      if (shortMatch) {
+        videoId = shortMatch[1];
+      }
+      
+      // Case 2: youtube.com/watch?v=VIDEO_ID
+      const watchMatch = url.match(/watch\?v=([^&]+)/);
+      if (watchMatch) {
+        videoId = watchMatch[1];
+      }
+      
+      // Case 3: youtube.com/embed/VIDEO_ID (already embed)
+      const embedMatch = url.match(/embed\/([^?&]+)/);
+      if (embedMatch) {
+        videoId = embedMatch[1];
+      }
+      
+      // Case 4: youtube.com/shorts/VIDEO_ID
+      const shortsMatch = url.match(/shorts\/([^?&]+)/);
+      if (shortsMatch) {
+        videoId = shortsMatch[1];
+      }
+      
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+      
+      // If no match, return original URL (fallback)
+      return url;
+    }
+
+    // ==========================================================
+    // LOAD VIDEO
+    // ==========================================================
     async function loadVideo() {
       const container = document.getElementById('videoContainer');
       try {
         const doc = await db.collection('settings').doc('settings').get();
         if (doc.exists) {
           const data = doc.data();
-          const videoUrl = data.videoUrl || '';
-          if (videoUrl) {
-            // Convert to embed URL if needed
-            let embedUrl = videoUrl;
-            // If it's a watch URL (youtube.com/watch?v=...), convert to embed
-            if (videoUrl.includes('watch?v=')) {
-              const videoId = new URLSearchParams(new URL(videoUrl).search).get('v');
-              if (videoId) embedUrl = `https://www.youtube.com/embed/${videoId}`;
-            }
-            // If it's already embed URL, use as is
+          const rawUrl = data.videoUrl || '';
+          
+          if (rawUrl) {
+            // 🔥 Auto-convert to embed URL
+            const embedUrl = getEmbedUrl(rawUrl);
+            
             container.innerHTML = `
               <div class="video-container">
                 <iframe src="${embedUrl}" 
